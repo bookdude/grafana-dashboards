@@ -86,7 +86,7 @@ Tags: `clickhouse`, `publishers`, `revenue`
 |---|---|
 | `vcasa_performance.json` | Full dashboard — win rate, impressions, requests, hourly and monthly comparisons |
 | `vcasa_searchable.json` | Searchable time series table view |
-| `vcasa_performance_v2.json` | Empty — in progress |
+| `vcasa_performance_v2.json` | **v2 schema** (Grafana 12+ elements/layout format) — in progress; use `deploy_dashboard.py` to push (standard curl fails) |
 
 VCASA queries against `default.25_ss_dist_reporting` and `default.hourly_last_72h_sums`.
 
@@ -134,7 +134,7 @@ Tags: `ai`, `clickhouse`, `podcast`/`media`
 
 - **Active / production**: `publisher_monetization_overview_45`, `vcasa_performance`, `dist_productivity__outlier_intelligence`, `podcast_ai_drivers__ecpm__efficiency_exec-ready`, infra dashboards
 - **Older revisions**: `publisher_monetization_overview_42` (superseded by _45), `podcast_ai_drivers__ecpm__efficiency` (superseded by exec-ready)
-- **WIP / draft**: `wip_new_dashboard`, `new_dashboard`, `vcasa_performance_v2` (empty)
+- **WIP / draft**: `wip_new_dashboard`, `new_dashboard`, `vcasa_performance_v2` (in progress, v2 schema)
 - **One-off / diagnostic**: `troubleshoot_and_test_dashboard`
 
 ---
@@ -142,7 +142,7 @@ Tags: `ai`, `clickhouse`, `podcast`/`media`
 ### VCASA Monitoring
 | File | Notes |
 |---|---|
-| `vcasa_system_status.json` | **Primary up/down monitor** — YTD universe vs latest-hour online; green/red table + summary stats |
+| `vcasa_system_status.json` | **Primary up/down monitor** — YTD universe vs latest-hour online; columns: Status, VCASA (SSH link), Dist, City, State, IP, Up %, Up Hours, Loss %, RTT ms, Ping RX, Last Seen |
 | `vcasa_up_down.json` | Earlier prototype using `Vcasa_to_info_seen.last_seen`; superseded by `vcasa_system_status` |
 
 ---
@@ -152,6 +152,7 @@ Tags: `ai`, `clickhouse`, `podcast`/`media`
 | View | Purpose |
 |---|---|
 | `default.v_vcasa_to_dist` | Maps every VCASA name ↔ Dist ↔ IP. One row per (vcasa_name, dist, ip). Use this instead of raw joins to `Vcasa_to_info`. |
+| `default.v_vcasa_system_status` | Live system status per VCASA — mirrors the dashboard table exactly. Columns: `status`, `vcasa_name`, `dist`, `city`, `state`, `ip`, `up_pct`, `up_hours`, `loss_pct`, `rtt_ms`, `rx`, `last_seen`. Query this for programmatic access to the same data the dashboard shows. |
 
 ### v_vcasa_to_dist details
 - **IP source**: `default.serial_ip` (most current, updated daily; supports multiple IPs per VCASA)
@@ -176,6 +177,32 @@ GROUP BY v.vcasa_name, v.ip
 | `default.Vcasa_to_info_seen` | Same as above + `last_seen` DateTime |
 | `default.serial_ip` | Current public IPs — `host` (Vcasa name), `public_ip`, `loaded_at`; one row per IP |
 | `default.v_vcasa_dist_activity_complete` | Activity summary — `vcasa_host`, `proposed_dist`, `public_ips` (Array), `last_seen_90d`, `requests_90d` |
+| `default.ping_results` | Live ICMP ping — `timestamp`, `ip`, `tx`, `rx`, `loss` (Float32), `rtt_min/avg/max/mdev`. Updated every 10 min, TTL retention. Filter `tx > 0` to exclude probes with no data. |
+
+---
+
+## Scripts
+
+| Script | Purpose |
+|---|---|
+| `deploy_dashboard.py` | Deploy a single dashboard JSON file. Auto-detects v1/v2 schema and routes to the correct Grafana API. |
+| `launch_deploy.py` | Deploy all (or selected) dashboards in parallel. Includes lock-file protection against concurrent runs. |
+
+### deploy_dashboard.py
+```bash
+python3 deploy_dashboard.py <file.json>
+python3 deploy_dashboard.py <file.json> --folder <folderUid>
+```
+
+### launch_deploy.py
+```bash
+python3 launch_deploy.py                        # deploy all *.json in this directory
+python3 launch_deploy.py foo.json bar.json      # deploy specific files
+python3 launch_deploy.py --dry-run              # schema-detect only, no push
+python3 launch_deploy.py --workers 10           # concurrency (default: 8)
+python3 launch_deploy.py --folder <uid>         # override target folder
+```
+Exit codes: `0` = all succeeded · `1` = one or more failures · `2` = another deploy already running
 
 ---
 
@@ -183,23 +210,29 @@ GROUP BY v.vcasa_name, v.ip
 
 **Every dashboard create or update must be pushed to Grafana via API** so changes appear immediately in the web UI.
 
-```bash
-GRAFANA_TOKEN="<service-account-token>"   # stored in memory, do not commit
-FOLDER_UID="aflfff842d2iod"   # "testing" folder
-DASHBOARD=$(cat /etc/grafana/dashboards/<filename>.json)
+Use `deploy_dashboard.py` — it handles both v1 and v2 schema automatically:
 
-curl -s -X POST \
-  -H "Authorization: Bearer $GRAFANA_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d "{\"dashboard\": $DASHBOARD, \"folderUid\": \"$FOLDER_UID\", \"overwrite\": true}" \
-  http://localhost:3000/api/dashboards/db
+```bash
+python3 /etc/grafana/dashboards/deploy_dashboard.py <filename>.json
+python3 /etc/grafana/dashboards/deploy_dashboard.py <filename>.json --folder <folderUid>
 ```
+
+**Do NOT use the curl one-liner for dashboard deployment.** It fails silently for v2 dashboards and hits shell argument length limits on large files. The Python script handles both.
 
 Grafana instance: `http://localhost:3000`
 Service account: `claude` (sa-1-claude)
 Folders: `testing` = `aflfff842d2iod` | `Revenue` = `cfj72hwwwhwqoa` | `Revenue-GK` = `efjrkl235jx8gc`
 
-**Always test all panel SQL queries in ClickHouse before pushing.** Verify the push returns `"status": "success"`.
+### Dashboard Schema Versions
+
+| Schema | Indicators | API endpoint |
+|---|---|---|
+| v1 (legacy) | Has `"schemaVersion"` int + `"panels"` array | `POST /api/dashboards/db` |
+| v2 (Grafana 12+) | No `"schemaVersion"`, uses `"elements"` dict + `"layout"` | `PUT /apis/dashboard.grafana.app/v2beta1/namespaces/default/dashboards/{uid}` |
+
+**Known Grafana 13 bug — v2 file provisioner drops panels:** When Grafana 13 loads a v2 schema file from `/etc/grafana/dashboards/` at startup, it silently stores an empty `elements: {}` and `layout.items: []` in its internal v2beta1 storage. The old `/api/dashboards/db` endpoint masks this by reading from the file on disk, but Grafana's renderer reads from the stored spec, so the dashboard appears blank. The deploy script bypasses this by writing directly to the v2beta1 API, which verifies the element count after push.
+
+**Always test all panel SQL queries in ClickHouse before pushing.** Verify the push prints `OK`.
 
 ---
 

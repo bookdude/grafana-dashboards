@@ -271,13 +271,125 @@
       ]
     },
     {
+      "id": 6,
+      "type": "timeseries",
+      "title": "VCASA Online Count Over Time",
+      "description": "Distinct VCASA units active per hour. Responds to the dashboard time range picker.",
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aep99bsdau1a8f"
+      },
+      "options": {
+        "tooltip": {"mode": "single", "sort": "none"},
+        "legend": {"displayMode": "list", "placement": "bottom", "calcs": ["mean", "last"]}
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "lineWidth": 1,
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "showPoints": "never",
+            "barAlignment": 0
+          },
+          "color": {"fixedColor": "green", "mode": "fixed"},
+          "unit": "short",
+          "displayName": "Online"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aep99bsdau1a8f"
+          },
+          "rawSql": "SELECT toStartOfHour(r.timestamp) AS time, countDistinct(v.vcasa_name) AS online_count FROM default.`26_ss_dist_reporting` r JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist WHERE $__timeFilter(r.timestamp) AND r.Dist NOT LIKE 'generated%' GROUP BY time ORDER BY time",
+          "format": 0,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Fleet Network Health Over Time",
+      "description": "Fleet-wide average RTT (ms, left axis) and packet loss % (right axis) from 10-minute ping cycles. Responds to the dashboard time range picker.",
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aep99bsdau1a8f"
+      },
+      "options": {
+        "tooltip": {"mode": "multi", "sort": "none"},
+        "legend": {"displayMode": "list", "placement": "bottom", "calcs": ["mean", "max"]}
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "showPoints": "never",
+            "axisPlacement": "auto"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "avg_rtt_ms"},
+            "properties": [
+              {"id": "unit", "value": "ms"},
+              {"id": "color", "value": {"fixedColor": "blue", "mode": "fixed"}},
+              {"id": "displayName", "value": "Avg RTT ms"}
+            ]
+          },
+          {
+            "matcher": {"id": "byName", "options": "avg_loss_pct"},
+            "properties": [
+              {"id": "custom.axisPlacement", "value": "right"},
+              {"id": "unit", "value": "percent"},
+              {"id": "color", "value": {"fixedColor": "red", "mode": "fixed"}},
+              {"id": "displayName", "value": "Avg Loss %"}
+            ]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aep99bsdau1a8f"
+          },
+          "rawSql": "SELECT toStartOfInterval(timestamp, INTERVAL 10 MINUTE) AS time, avgIf(rtt_avg, tx > 0) AS avg_rtt_ms, avgIf(loss, tx > 0) * 100 AS avg_loss_pct FROM default.ping_results WHERE $__timeFilter(timestamp) AND tx > 0 GROUP BY time ORDER BY time",
+          "format": 0,
+          "refId": "A"
+        }
+      ]
+    },
+    {
       "id": 5,
       "type": "table",
       "title": "VCASA Status \u2014 All YTD Systems",
       "description": "All VCASA units observed YTD, sorted by reliability (Up %). Status reflects the most recent data hour. Loss % and RTT ms are live from the last 15-minute ping cycle. Use column filter icons to search by unit name, city, or state.",
       "gridPos": {
         "x": 0,
-        "y": 4,
+        "y": 12,
         "w": 24,
         "h": 28
       },
@@ -708,6 +820,105 @@
           {
             "matcher": {
               "id": "byName",
+              "options": "RX MB/s"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-background",
+                  "mode": "gradient"
+                }
+              },
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "custom.width",
+                "value": 100
+              },
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "unit",
+                "value": "MBs"
+              },
+              {
+                "id": "noValue",
+                "value": "—"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "red",    "value": null },
+                    { "color": "orange", "value": 1 },
+                    { "color": "yellow", "value": 3 },
+                    { "color": "green",  "value": 5 }
+                  ]
+                }
+              },
+              {
+                "id": "color",
+                "value": { "mode": "thresholds" }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "RX Chg%"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": { "type": "color-text" }
+              },
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "custom.width",
+                "value": 75
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "noValue",
+                "value": "—"
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "red",    "value": null },
+                    { "color": "orange", "value": -25 },
+                    { "color": "text",   "value": -10 },
+                    { "color": "blue",   "value": 15 }
+                  ]
+                }
+              },
+              {
+                "id": "color",
+                "value": { "mode": "thresholds" }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
               "options": "Last Seen"
             },
             "properties": [
@@ -717,7 +928,7 @@
               },
               {
                 "id": "custom.width",
-                "value": 160
+                "value": 200
               }
             ]
           }
@@ -729,7 +940,7 @@
             "type": "grafana-clickhouse-datasource",
             "uid": "aep99bsdau1a8f"
           },
-          "rawSql": "WITH\n  latest_hour AS (\n    SELECT toStartOfHour(max(timestamp)) AS t FROM default.`26_ss_dist_reporting`\n  ),\n  ytd AS (\n    SELECT\n      v.vcasa_name,\n      any(v.ip)                                         AS ip,\n      any(v.dist)                                       AS dist,\n      any(v.city)                                       AS city,\n      any(v.state)                                      AS state,\n      any(v.provider)                                   AS provider,\n      max(r.timestamp)                                  AS last_seen,\n      countDistinct(toStartOfHour(r.timestamp))         AS up_hours\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= toStartOfYear(today())\n      AND r.Dist NOT LIKE 'generated%'\n    GROUP BY v.vcasa_name\n  ),\n  online AS (\n    SELECT DISTINCT v.vcasa_name\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= (SELECT t FROM latest_hour)\n      AND r.Dist NOT LIKE 'generated%'\n  ),\n  latest_ping AS (\n    SELECT ip,\n      avgIf(loss,    tx > 0) AS loss_pct,\n      avgIf(rtt_avg, tx > 0) AS rtt_ms,\n      round(avg(rx), 0)      AS rx\n    FROM default.ping_results\n    WHERE timestamp >= now() - INTERVAL 15 MINUTE\n      AND tx > 0\n    GROUP BY ip\n  ),\n  ping_by_vcasa AS (\n    SELECT v.vcasa_name,\n      round(avg(p.loss_pct), 1) AS loss_pct,\n      round(avg(p.rtt_ms),   1) AS rtt_ms,\n      round(avg(p.rx),       0) AS rx\n    FROM default.v_vcasa_to_dist v\n    JOIN latest_ping p ON v.ip = p.ip\n    GROUP BY v.vcasa_name\n  )\nSELECT\n  if(o.vcasa_name != '', 1, 0)                                                     AS \"Status\",\n  y.vcasa_name                                                                     AS \"VCASA\",\n  if(startsWith(y.dist, 'w_'), substring(y.dist, 3), y.dist)                      AS \"Dist\",\n  y.city                                                                           AS \"City\",\n  y.state                                                                          AS \"State\",\n  y.ip                                                                             AS \"IP\",\n  round(y.up_hours * 100.0 / dateDiff('hour', toStartOfYear(today()), now()), 1)  AS \"Up %\",\n  y.up_hours                                                                       AS \"Up Hours\",\n  pg.loss_pct                                                                      AS \"Loss %\",\n  pg.rtt_ms                                                                        AS \"RTT ms\",\n  pg.rx                                                                            AS \"Ping RX\",\n  toUnixTimestamp(y.last_seen) * 1000                                              AS \"Last Seen\"\nFROM ytd y\nLEFT JOIN online o ON y.vcasa_name = o.vcasa_name\nLEFT JOIN ping_by_vcasa pg ON y.vcasa_name = pg.vcasa_name\nORDER BY \"Up %\" DESC",
+          "rawSql": "WITH\n  latest_hour AS (\n    SELECT toStartOfHour(max(timestamp)) AS t FROM default.`26_ss_dist_reporting`\n  ),\n  ytd AS (\n    SELECT\n      v.vcasa_name,\n      any(v.ip)                                         AS ip,\n      any(v.dist)                                       AS dist,\n      any(v.city)                                       AS city,\n      any(v.state)                                      AS state,\n      any(v.provider)                                   AS provider,\n      max(r.timestamp)                                  AS last_seen,\n      countDistinct(toStartOfHour(r.timestamp))         AS up_hours\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= toStartOfYear(today())\n      AND r.Dist NOT LIKE 'generated%'\n    GROUP BY v.vcasa_name\n  ),\n  online AS (\n    SELECT DISTINCT v.vcasa_name\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= (SELECT t FROM latest_hour)\n      AND r.Dist NOT LIKE 'generated%'\n  ),\n  latest_ping AS (\n    SELECT ip,\n      avgIf(loss,    tx > 0) AS loss_pct,\n      avgIf(rtt_avg, tx > 0) AS rtt_ms,\n      round(avg(rx), 0)      AS rx\n    FROM default.ping_results\n    WHERE timestamp >= now() - INTERVAL 15 MINUTE\n      AND tx > 0\n    GROUP BY ip\n  ),\n  ping_by_vcasa AS (\n    SELECT v.vcasa_name,\n      round(avg(p.loss_pct), 1) AS loss_pct,\n      round(avg(p.rtt_ms),   1) AS rtt_ms,\n      round(avg(p.rx),       0) AS rx\n    FROM default.v_vcasa_to_dist v\n    JOIN latest_ping p ON v.ip = p.ip\n    GROUP BY v.vcasa_name\n  ),\n  net_by_vcasa AS (\n    SELECT v.vcasa_name,\n      round(avg(n.rx_kbps) / 1024, 2) AS rx_mbps\n    FROM default.view_network_kbps_by_host n\n    JOIN default.v_vcasa_to_dist v ON n.host = v.ip\n    GROUP BY v.vcasa_name\n  ),\n  rx_now_cte AS (\n    SELECT v.vcasa_name,\n      round(\n        toFloat64(max(n.node_network_rx_bytes) - min(n.node_network_rx_bytes)) * 8 /\n        greatest(toUnixTimestamp(max(n.ts)) - toUnixTimestamp(min(n.ts)), 1) / 1000 / 1024, 5\n      ) AS rx_now\n    FROM default.node_exporter_metrics n\n    JOIN default.v_vcasa_to_dist v ON n.host = v.ip\n    WHERE n.ts >= now() - INTERVAL 1 HOUR\n    GROUP BY v.vcasa_name\n    HAVING count() >= 2\n  ),\n  rx_then_cte AS (\n    SELECT v.vcasa_name,\n      round(\n        toFloat64(max(n.node_network_rx_bytes) - min(n.node_network_rx_bytes)) * 8 /\n        greatest(toUnixTimestamp(max(n.ts)) - toUnixTimestamp(min(n.ts)), 1) / 1000 / 1024, 5\n      ) AS rx_then\n    FROM default.node_exporter_metrics n\n    JOIN default.v_vcasa_to_dist v ON n.host = v.ip\n    WHERE n.ts >= now() - INTERVAL 5 HOUR AND n.ts < now() - INTERVAL 4 HOUR\n    GROUP BY v.vcasa_name\n    HAVING count() >= 2\n  )\nSELECT\n  if(o.vcasa_name != '', 1, 0)                                                     AS \"Status\",\n  y.vcasa_name                                                                     AS \"VCASA\",\n  if(startsWith(y.dist, 'w_'), substring(y.dist, 3), y.dist)                      AS \"Dist\",\n  y.city                                                                           AS \"City\",\n  y.state                                                                          AS \"State\",\n  y.ip                                                                             AS \"IP\",\n  round(y.up_hours * 100.0 / dateDiff('hour', toStartOfYear(today()), now()), 1)  AS \"Up %\",\n  y.up_hours                                                                       AS \"Up Hours\",\n  pg.loss_pct                                                                      AS \"Loss %\",\n  pg.rtt_ms                                                                        AS \"RTT ms\",\n  pg.rx                                                                            AS \"Ping RX\",\n  nk.rx_mbps                                                                       AS \"RX MB/s\",\n  if(rn.rx_now > 0 AND rt.rx_then > 0,\n     round((rn.rx_now - rt.rx_then) / nullIf(rt.rx_then, 0) * 100, 0),\n     NULL\n  )                                                                               AS \"RX Chg%\",\n  toUnixTimestamp(y.last_seen) * 1000                                              AS \"Last Seen\"\nFROM ytd y\nLEFT JOIN online o ON y.vcasa_name = o.vcasa_name\nLEFT JOIN ping_by_vcasa pg ON y.vcasa_name = pg.vcasa_name\nLEFT JOIN net_by_vcasa nk ON y.vcasa_name = nk.vcasa_name\nLEFT JOIN rx_now_cte rn ON y.vcasa_name = rn.vcasa_name\nLEFT JOIN rx_then_cte rt ON y.vcasa_name = rt.vcasa_name\nORDER BY \"Up %\" DESC",
           "format": 1,
           "refId": "A"
         }

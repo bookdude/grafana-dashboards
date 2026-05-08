@@ -223,13 +223,42 @@
           {
             "matcher": { "id": "byName", "options": "Provider" },
             "properties": [{ "id": "custom.width", "value": 90 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Up Hours" },
+            "properties": [
+              { "id": "custom.width", "value": 90 },
+              { "id": "custom.align", "value": "right" }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Up %" },
+            "properties": [
+              { "id": "custom.width", "value": 80 },
+              { "id": "custom.align", "value": "right" },
+              { "id": "custom.displayMode", "value": "color-background" },
+              { "id": "unit", "value": "percent" },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "red",    "value": null },
+                    { "color": "orange", "value": 50 },
+                    { "color": "yellow", "value": 80 },
+                    { "color": "green",  "value": 95 }
+                  ]
+                }
+              },
+              { "id": "color", "value": { "mode": "thresholds" } }
+            ]
           }
         ]
       },
       "targets": [
         {
           "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
-          "rawSql": "WITH\n  latest_hour AS (\n    SELECT toStartOfHour(max(timestamp)) AS t FROM default.`26_ss_dist_reporting`\n  ),\n  ytd AS (\n    SELECT\n      v.vcasa_name,\n      any(v.ip)        AS ip,\n      any(v.city)      AS city,\n      any(v.state)     AS state,\n      any(v.provider)  AS provider,\n      max(r.timestamp) AS last_seen\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= toStartOfYear(today())\n      AND r.Dist NOT LIKE 'generated%'\n    GROUP BY v.vcasa_name\n  ),\n  online AS (\n    SELECT DISTINCT v.vcasa_name\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= (SELECT t FROM latest_hour)\n      AND r.Dist NOT LIKE 'generated%'\n  )\nSELECT\n  y.vcasa_name                                    AS \"VCASA\",\n  if(o.vcasa_name != '', 1, 0)                    AS \"Status\",\n  y.ip                                            AS \"IP\",\n  y.city                                          AS \"City\",\n  y.state                                         AS \"State\",\n  y.provider                                      AS \"Provider\",\n  toUnixTimestamp(y.last_seen) * 1000             AS \"Last Seen\"\nFROM ytd y\nLEFT JOIN online o ON y.vcasa_name = o.vcasa_name\nORDER BY \"Status\" ASC, \"Last Seen\" ASC",
+          "rawSql": "WITH\n  latest_hour AS (\n    SELECT toStartOfHour(max(timestamp)) AS t FROM default.`26_ss_dist_reporting`\n  ),\n  ytd AS (\n    SELECT\n      v.vcasa_name,\n      any(v.ip)                                                                     AS ip,\n      any(v.city)                                                                   AS city,\n      any(v.state)                                                                  AS state,\n      any(v.provider)                                                               AS provider,\n      max(r.timestamp)                                                              AS last_seen,\n      countDistinct(toStartOfHour(r.timestamp))                                     AS up_hours\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= toStartOfYear(today())\n      AND r.Dist NOT LIKE 'generated%'\n    GROUP BY v.vcasa_name\n  ),\n  online AS (\n    SELECT DISTINCT v.vcasa_name\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= (SELECT t FROM latest_hour)\n      AND r.Dist NOT LIKE 'generated%'\n  )\nSELECT\n  y.vcasa_name                                                                      AS \"VCASA\",\n  if(o.vcasa_name != '', 1, 0)                                                      AS \"Status\",\n  y.ip                                                                              AS \"IP\",\n  y.city                                                                            AS \"City\",\n  y.state                                                                           AS \"State\",\n  y.provider                                                                        AS \"Provider\",\n  toUnixTimestamp(y.last_seen) * 1000                                               AS \"Last Seen\",\n  y.up_hours                                                                        AS \"Up Hours\",\n  round(y.up_hours * 100.0 / dateDiff('hour', toStartOfYear(today()), now()), 1)   AS \"Up %\"\nFROM ytd y\nLEFT JOIN online o ON y.vcasa_name = o.vcasa_name\nORDER BY \"Status\" ASC, \"Last Seen\" ASC",
           "format": 1,
           "refId": "A"
         }

@@ -1,0 +1,372 @@
+{
+    "annotations": {
+        "list": []
+    },
+    "panels": [
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${DS_CLICKHOUSE}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "decimals": 6
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "importance"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 6
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 9,
+                "w": 10,
+                "x": 0,
+                "y": 0
+            },
+            "id": 10,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "table",
+                    "rawSql": "SELECT feature, importance\nFROM default.media_ai_importance\nWHERE run_time = (SELECT max(run_time) FROM default.media_ai_importance)\n  AND target = '${target}'\nORDER BY importance DESC\nLIMIT 15",
+                    "refId": "A"
+                }
+            ],
+            "title": "Top drivers (selected target)",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${DS_CLICKHOUSE}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "dateTimeAsIso"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 3,
+                "w": 14,
+                "x": 10,
+                "y": 0
+            },
+            "id": 11,
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "values": false
+                }
+            },
+            "targets": [
+                {
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "table",
+                    "rawSql": "SELECT toDateTime(max(run_time)) AS run_time FROM default.media_ai_importance",
+                    "refId": "A"
+                }
+            ],
+            "title": "Latest run_time",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${DS_CLICKHOUSE}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "decimals": 6
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "avg_ecpm"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 4
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "avg_wr"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percentunit"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 4
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "avg_eff"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "none"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 6
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "avg_fill"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "none"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 4
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "requests"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "inventory"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "impressions"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 14,
+                "x": 10,
+                "y": 3
+            },
+            "id": 12,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  publisher,\n  hod,\n  avg_ecpm,\n  avg_wr,\n  avg_eff,\n  avg_fill,\n  requests,\n  inventory,\n  impressions\nFROM default.media_ai_structure\nWHERE run_time = (SELECT max(run_time) FROM default.media_ai_structure)\n  AND match(publisher, '${publisher}')\nORDER BY\n  if('${target}'='ecpm', avg_ecpm,\n     if('${target}'='win_rate', avg_wr, avg_eff)) DESC\nLIMIT 200",
+                    "refId": "A"
+                }
+            ],
+            "title": "Publisher \u00d7 Hour: rank by selected KPI",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${DS_CLICKHOUSE}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "decimals": 6,
+                    "unit": "none"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 9
+            },
+            "id": 13,
+            "options": {
+                "legend": {
+                    "showLegend": false
+                },
+                "tooltip": {
+                    "mode": "single"
+                }
+            },
+            "targets": [
+                {
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "table",
+                    "rawSql": "SELECT x, y\nFROM default.media_ai_pdp\nWHERE run_time = (SELECT max(run_time) FROM default.media_ai_pdp)\n  AND target = '${target}'\n  AND var = '${pdp_var}'\nORDER BY x",
+                    "refId": "A"
+                }
+            ],
+            "title": "Saturation curve (PDP) \u2014 selected target vs selected curve",
+            "transformations": [
+                {
+                    "id": "organize",
+                    "options": {
+                        "indexByName": {},
+                        "renameByName": {
+                            "x": "X",
+                            "y": "Y"
+                        }
+                    }
+                }
+            ],
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${DS_CLICKHOUSE}"
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 17
+            },
+            "id": 14,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "table",
+                    "rawSql": "WITH base AS (\n  SELECT\n    publisher,\n    hod,\n    avg_ecpm,\n    avg_wr,\n    avg_eff,\n    avg_fill,\n    requests,\n    inventory,\n    impressions,\n    if('${target}'='ecpm', avg_ecpm, if('${target}'='win_rate', avg_wr, avg_eff)) AS kpi\n  FROM default.media_ai_structure\n  WHERE run_time = (SELECT max(run_time) FROM default.media_ai_structure)\n    AND match(publisher, '${publisher}')\n), ranked AS (\n  SELECT\n    *,\n    row_number() OVER (PARTITION BY publisher ORDER BY kpi DESC) AS rn_best,\n    row_number() OVER (PARTITION BY publisher ORDER BY kpi ASC)  AS rn_worst\n  FROM base\n)\nSELECT\n  publisher,\n  groupArrayIf(hod, rn_best <= 3) AS best_hours,\n  groupArrayIf(hod, rn_worst <= 3) AS worst_hours\nFROM ranked\nGROUP BY publisher\nORDER BY publisher",
+                    "refId": "A"
+                }
+            ],
+            "title": "Best vs worst hours per publisher (action list)",
+            "type": "table"
+        }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 39,
+    "tags": [
+        "ai",
+        "media",
+        "clickhouse"
+    ],
+    "templating": {
+        "list": [
+            {
+                "current": {},
+                "label": "ClickHouse",
+                "name": "DS_CLICKHOUSE",
+                "query": "grafana-clickhouse-datasource",
+                "refresh": 1,
+                "type": "datasource"
+            },
+            {
+                "current": {
+                    "text": "ecpm",
+                    "value": "ecpm"
+                },
+                "label": "Target",
+                "name": "target",
+                "query": "ecpm,win_rate,efficiency",
+                "type": "custom"
+            },
+            {
+                "current": {
+                    "text": "log_br",
+                    "value": "log_br"
+                },
+                "label": "Curve",
+                "name": "pdp_var",
+                "query": "log_br,log_inv,hod",
+                "type": "custom"
+            },
+            {
+                "allValue": ".*",
+                "current": {
+                    "text": "All",
+                    "value": ".*"
+                },
+                "datasource": {
+                    "type": "grafana-clickhouse-datasource",
+                    "uid": "${DS_CLICKHOUSE}"
+                },
+                "definition": "SELECT DISTINCT publisher FROM default.media_ai_structure WHERE run_time = (SELECT max(run_time) FROM default.media_ai_structure) ORDER BY publisher",
+                "hide": 0,
+                "includeAll": true,
+                "label": "Publisher",
+                "name": "publisher",
+                "query": "SELECT DISTINCT publisher FROM default.media_ai_structure WHERE run_time = (SELECT max(run_time) FROM default.media_ai_structure) ORDER BY publisher",
+                "refresh": 2,
+                "type": "query"
+            }
+        ]
+    },
+    "time": {
+        "from": "now-30d",
+        "to": "now"
+    },
+    "timezone": "browser",
+    "title": "Media AI Drivers \u2014 Insight View",
+    "uid": "media-ai-drivers-v2",
+    "version": 1
+}

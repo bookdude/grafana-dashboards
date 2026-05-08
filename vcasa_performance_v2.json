@@ -1,0 +1,3702 @@
+{
+    "annotations": [
+        {
+            "kind": "AnnotationQuery",
+            "spec": {
+                "builtIn": true,
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "query": {
+                    "datasource": {
+                        "name": "-- Grafana --"
+                    },
+                    "group": "grafana",
+                    "kind": "DataQuery",
+                    "spec": {},
+                    "version": "v0"
+                }
+            }
+        }
+    ],
+    "cursorSync": "Off",
+    "editable": true,
+    "elements": {
+        "panel-10": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "builderOptions": {
+                                                "aggregates": [],
+                                                "columns": [
+                                                    {
+                                                        "alias": "timestamp",
+                                                        "custom": false,
+                                                        "name": "timestamp",
+                                                        "type": "DateTime"
+                                                    },
+                                                    {
+                                                        "alias": "Impressions",
+                                                        "custom": false,
+                                                        "name": "Impressions",
+                                                        "type": "UInt64"
+                                                    }
+                                                ],
+                                                "database": "default",
+                                                "filters": [],
+                                                "groupBy": [],
+                                                "limit": 48,
+                                                "meta": {},
+                                                "mode": "list",
+                                                "orderBy": [],
+                                                "queryType": "table",
+                                                "table": "hourly_last_72h"
+                                            },
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "aggregates": [],
+                                                    "columns": [
+                                                        {
+                                                            "alias": "timestamp",
+                                                            "custom": false,
+                                                            "name": "timestamp",
+                                                            "type": "DateTime"
+                                                        },
+                                                        {
+                                                            "alias": "Impressions",
+                                                            "custom": false,
+                                                            "name": "Impressions",
+                                                            "type": "UInt64"
+                                                        }
+                                                    ],
+                                                    "database": "default",
+                                                    "filters": [],
+                                                    "groupBy": [],
+                                                    "limit": 48,
+                                                    "meta": {},
+                                                    "mode": "list",
+                                                    "orderBy": [],
+                                                    "queryType": "table",
+                                                    "table": "hourly_last_72h"
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Requests) AS Requests\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Wattage"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Requests) AS Requests\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND Dist LIKE 'w_C%'\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Brightcom"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Requests) AS Requests\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND Dist LIKE 'w_E%'\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "eSpot"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 10,
+                "links": [],
+                "title": "Requests (1hr)",
+                "vizConfig": {
+                    "group": "bargauge",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "continuous-GrYlRd"
+                                },
+                                "thresholds": {
+                                    "mode": "percentage",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        },
+                                        {
+                                            "color": "red",
+                                            "value": 80
+                                        }
+                                    ]
+                                },
+                                "unit": "locale"
+                            },
+                            "overrides": []
+                        },
+                        "options": {
+                            "displayMode": "lcd",
+                            "legend": {
+                                "calcs": [],
+                                "displayMode": "list",
+                                "placement": "bottom",
+                                "showLegend": false
+                            },
+                            "maxVizHeight": 300,
+                            "minVizHeight": 16,
+                            "minVizWidth": 8,
+                            "namePlacement": "auto",
+                            "orientation": "auto",
+                            "reduceOptions": {
+                                "calcs": [
+                                    "lastNotNull"
+                                ],
+                                "fields": "",
+                                "values": false
+                            },
+                            "showUnfilled": true,
+                            "sizing": "auto",
+                            "valueMode": "color"
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-11": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "All"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "builderOptions": {
+                                                "aggregates": [],
+                                                "columns": [
+                                                    {
+                                                        "alias": "timestamp",
+                                                        "custom": false,
+                                                        "name": "timestamp",
+                                                        "type": "DateTime"
+                                                    },
+                                                    {
+                                                        "alias": "Impressions",
+                                                        "custom": false,
+                                                        "name": "Impressions",
+                                                        "type": "UInt64"
+                                                    }
+                                                ],
+                                                "database": "default",
+                                                "filters": [],
+                                                "groupBy": [],
+                                                "limit": 48,
+                                                "meta": {},
+                                                "mode": "list",
+                                                "orderBy": [],
+                                                "queryType": "table",
+                                                "table": "hourly_last_72h"
+                                            },
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "aggregates": [],
+                                                    "columns": [
+                                                        {
+                                                            "alias": "timestamp",
+                                                            "custom": false,
+                                                            "name": "timestamp",
+                                                            "type": "DateTime"
+                                                        },
+                                                        {
+                                                            "alias": "Impressions",
+                                                            "custom": false,
+                                                            "name": "Impressions",
+                                                            "type": "UInt64"
+                                                        }
+                                                    ],
+                                                    "database": "default",
+                                                    "filters": [],
+                                                    "groupBy": [],
+                                                    "limit": 48,
+                                                    "meta": {},
+                                                    "mode": "list",
+                                                    "orderBy": [],
+                                                    "queryType": "table",
+                                                    "table": "hourly_last_72h"
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND startsWith(Dist, 'w_C')\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Brightcom"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND startsWith(Dist, 'w_E')\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "eSpot"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND startsWith(Dist, 'generated')\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "generated"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 11,
+                "links": [],
+                "title": "WinRate (1hr)",
+                "vizConfig": {
+                    "group": "bargauge",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "continuous-GrYlRd"
+                                },
+                                "thresholds": {
+                                    "mode": "percentage",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        },
+                                        {
+                                            "color": "red",
+                                            "value": 80
+                                        }
+                                    ]
+                                },
+                                "unit": "percentunit"
+                            },
+                            "overrides": []
+                        },
+                        "options": {
+                            "displayMode": "lcd",
+                            "legend": {
+                                "calcs": [],
+                                "displayMode": "list",
+                                "placement": "bottom",
+                                "showLegend": false
+                            },
+                            "maxVizHeight": 300,
+                            "minVizHeight": 16,
+                            "minVizWidth": 8,
+                            "namePlacement": "auto",
+                            "orientation": "auto",
+                            "reduceOptions": {
+                                "calcs": [
+                                    "lastNotNull"
+                                ],
+                                "fields": "",
+                                "values": false
+                            },
+                            "showUnfilled": true,
+                            "sizing": "auto",
+                            "valueMode": "color"
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-13": {
+            "kind": "LibraryPanel",
+            "spec": {
+                "id": 13,
+                "libraryPanel": {
+                    "name": "Wattage WinRate",
+                    "uid": "efkgy54vn0f7kd"
+                },
+                "title": "Wattage WinRate"
+            }
+        },
+        "panel-15": {
+            "kind": "LibraryPanel",
+            "spec": {
+                "id": 15,
+                "libraryPanel": {
+                    "name": "Wattage Impressions",
+                    "uid": "ffkgy60kd53wga"
+                },
+                "title": "Wattage Impressions"
+            }
+        },
+        "panel-17": {
+            "kind": "LibraryPanel",
+            "spec": {
+                "id": 17,
+                "libraryPanel": {
+                    "name": "Wattage Requests",
+                    "uid": "ffkgy5mh0rjlsa"
+                },
+                "title": "Wattage Requests"
+            }
+        },
+        "panel-18": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 0,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "timeseries",
+                                            "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "All"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND startsWith(Dist, 'w_C')\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Brightcom"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND startsWith(Dist, 'w_E')\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "eSpot"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 18,
+                "links": [],
+                "title": "Hourly % Win Rate Brightcom - eSpot",
+                "vizConfig": {
+                    "group": "barchart",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "thresholds"
+                                },
+                                "custom": {
+                                    "axisBorderShow": false,
+                                    "axisCenteredZero": false,
+                                    "axisColorMode": "text",
+                                    "axisLabel": "",
+                                    "axisPlacement": "auto",
+                                    "fillOpacity": 80,
+                                    "gradientMode": "none",
+                                    "hideFrom": {
+                                        "legend": false,
+                                        "tooltip": false,
+                                        "viz": false
+                                    },
+                                    "lineWidth": 1,
+                                    "scaleDistribution": {
+                                        "type": "linear"
+                                    },
+                                    "thresholdsStyle": {
+                                        "mode": "off"
+                                    }
+                                },
+                                "thresholds": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        }
+                                    ]
+                                },
+                                "unit": "percentunit"
+                            },
+                            "overrides": [
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "All win_rate"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-green",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Brightcom win_rate"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-blue",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "eSpot win_rate"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-yellow",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "options": {
+                            "barRadius": 0,
+                            "barWidth": 0.97,
+                            "fullHighlight": false,
+                            "groupWidth": 0.7,
+                            "legend": {
+                                "calcs": [],
+                                "displayMode": "list",
+                                "placement": "bottom",
+                                "showLegend": true
+                            },
+                            "orientation": "auto",
+                            "showValue": "auto",
+                            "stacking": "none",
+                            "tooltip": {
+                                "hideZeros": false,
+                                "mode": "single",
+                                "sort": "none"
+                            },
+                            "xTickLabelRotation": 45,
+                            "xTickLabelSpacing": 0
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-19": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 0,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "timeseries",
+                                            "rawSql": "WITH\n  cutoff AS (\n    SELECT (toStartOfHour(now()) - INTERVAL 3 HOUR) AS cut\n  ),\n  per_hour AS (\n    SELECT\n      toStartOfHour(timestamp) AS time,\n      sum(Impressions) AS imps,\n      sum(Requests)    AS reqs\n    FROM default.`26_ss_dist_reporting`\n    WHERE timestamp >= (SELECT cut FROM cutoff) - INTERVAL 24 HOUR\n      AND timestamp <  (SELECT cut FROM cutoff)\n    GROUP BY time\n  ),\n  per_hour_win_volume AS (\n    SELECT\n      time,\n      imps,\n      reqs,\n      imps / nullIf(reqs, 0) AS winrate,\n      imps * (imps / nullIf(reqs, 0)) AS weighted_win\n    FROM per_hour\n  )\nSELECT\n  time,\n  weighted_win / sum(weighted_win) OVER () * 100 AS winrate_share_pct\nFROM per_hour_win_volume\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "A"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 19,
+                "links": [],
+                "title": "Hourly % of Total",
+                "vizConfig": {
+                    "group": "barchart",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "thresholds"
+                                },
+                                "custom": {
+                                    "axisBorderShow": false,
+                                    "axisCenteredZero": false,
+                                    "axisColorMode": "text",
+                                    "axisLabel": "",
+                                    "axisPlacement": "auto",
+                                    "fillOpacity": 80,
+                                    "gradientMode": "none",
+                                    "hideFrom": {
+                                        "legend": false,
+                                        "tooltip": false,
+                                        "viz": false
+                                    },
+                                    "lineWidth": 1,
+                                    "scaleDistribution": {
+                                        "type": "linear"
+                                    },
+                                    "thresholdsStyle": {
+                                        "mode": "off"
+                                    }
+                                },
+                                "thresholds": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        }
+                                    ]
+                                },
+                                "unit": "percent"
+                            },
+                            "overrides": []
+                        },
+                        "options": {
+                            "barRadius": 0,
+                            "barWidth": 0.97,
+                            "fullHighlight": false,
+                            "groupWidth": 0.7,
+                            "legend": {
+                                "calcs": [],
+                                "displayMode": "list",
+                                "placement": "bottom",
+                                "showLegend": true
+                            },
+                            "orientation": "auto",
+                            "showValue": "auto",
+                            "stacking": "none",
+                            "tooltip": {
+                                "hideZeros": false,
+                                "mode": "single",
+                                "sort": "none"
+                            },
+                            "xTickLabelRotation": 45,
+                            "xTickLabelSpacing": 0
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-22": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 0,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "timeseries",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Requests) AS Requests\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "All"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Requests) AS Requests\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\n  AND startsWith(Dist, 'w_C')\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Brightcom"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Requests) AS Requests\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\n  AND startsWith(Dist, 'w_E')\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "eSpot"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 22,
+                "links": [],
+                "title": "Hourly Requests",
+                "vizConfig": {
+                    "group": "barchart",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "thresholds"
+                                },
+                                "custom": {
+                                    "axisBorderShow": false,
+                                    "axisCenteredZero": false,
+                                    "axisColorMode": "text",
+                                    "axisLabel": "",
+                                    "axisPlacement": "auto",
+                                    "fillOpacity": 80,
+                                    "gradientMode": "none",
+                                    "hideFrom": {
+                                        "legend": false,
+                                        "tooltip": false,
+                                        "viz": false
+                                    },
+                                    "lineWidth": 1,
+                                    "scaleDistribution": {
+                                        "type": "linear"
+                                    },
+                                    "thresholdsStyle": {
+                                        "mode": "off"
+                                    }
+                                },
+                                "thresholds": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        }
+                                    ]
+                                }
+                            },
+                            "overrides": [
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "All Requests"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "custom.axisColorMode",
+                                            "value": "text"
+                                        },
+                                        {
+                                            "id": "custom.axisColorMode",
+                                            "value": "text"
+                                        },
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-green",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "eSpot Requests"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-yellow",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Brightcom Requests"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-blue",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Requests"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "unit",
+                                            "value": "locale"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "options": {
+                            "barRadius": 0,
+                            "barWidth": 0.97,
+                            "fullHighlight": false,
+                            "groupWidth": 0.7,
+                            "legend": {
+                                "calcs": [],
+                                "displayMode": "list",
+                                "placement": "bottom",
+                                "showLegend": true
+                            },
+                            "orientation": "auto",
+                            "showValue": "auto",
+                            "stacking": "none",
+                            "tooltip": {
+                                "hideZeros": false,
+                                "mode": "single",
+                                "sort": "none"
+                            },
+                            "xTickLabelRotation": 45,
+                            "xTickLabelSpacing": 0
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-23": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 0,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "timeseries",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) AS Impressions\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "All"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) AS Impressions\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\n  AND Dist LIKE '%_C_%'\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Brigthcom"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) AS Impressions\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\n  AND Dist LIKE '%_E_%'\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "eSpot"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 23,
+                "links": [],
+                "title": "Hourly Impressions",
+                "vizConfig": {
+                    "group": "barchart",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "thresholds"
+                                },
+                                "custom": {
+                                    "axisBorderShow": false,
+                                    "axisCenteredZero": false,
+                                    "axisColorMode": "text",
+                                    "axisLabel": "",
+                                    "axisPlacement": "auto",
+                                    "fillOpacity": 80,
+                                    "gradientMode": "none",
+                                    "hideFrom": {
+                                        "legend": false,
+                                        "tooltip": false,
+                                        "viz": false
+                                    },
+                                    "lineWidth": 1,
+                                    "scaleDistribution": {
+                                        "type": "linear"
+                                    },
+                                    "thresholdsStyle": {
+                                        "mode": "off"
+                                    }
+                                },
+                                "thresholds": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        }
+                                    ]
+                                },
+                                "unit": "percentunit"
+                            },
+                            "overrides": [
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Impressions"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "unit",
+                                            "value": "locale"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Requests"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "unit",
+                                            "value": "locale"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "All Requests"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "custom.axisColorMode",
+                                            "value": "text"
+                                        },
+                                        {
+                                            "id": "custom.axisColorMode",
+                                            "value": "text"
+                                        },
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "mode": "continuous-YlBl"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "eSpot Impressions"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-yellow",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "All Impressions"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-green",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Brigthcom Impressions"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-blue",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "options": {
+                            "barRadius": 0,
+                            "barWidth": 0.97,
+                            "fullHighlight": false,
+                            "groupWidth": 0.7,
+                            "legend": {
+                                "calcs": [],
+                                "displayMode": "list",
+                                "placement": "bottom",
+                                "showLegend": true
+                            },
+                            "orientation": "auto",
+                            "showValue": "auto",
+                            "stacking": "none",
+                            "tooltip": {
+                                "hideZeros": false,
+                                "mode": "single",
+                                "sort": "none"
+                            },
+                            "xTickLabelRotation": 45,
+                            "xTickLabelSpacing": 0
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-24": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 0,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "timeseries",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Now"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp + INTERVAL 24 HOUR) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_yesterday\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp + INTERVAL 24 HOUR)\n  AND (timestamp + INTERVAL 24 HOUR) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "24 Hours"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp + INTERVAL 72 HOUR) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_72h\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp + INTERVAL 72 HOUR)\n  AND (timestamp + INTERVAL 72 HOUR) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "72 Hours"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp + INTERVAL 168 HOUR) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_1w\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp + INTERVAL 168 HOUR)\n  AND (timestamp + INTERVAL 168 HOUR) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "1 week"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 24,
+                "links": [],
+                "title": "Hourly % Win Rate Day Compare",
+                "vizConfig": {
+                    "group": "barchart",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "thresholds"
+                                },
+                                "custom": {
+                                    "axisBorderShow": false,
+                                    "axisCenteredZero": false,
+                                    "axisColorMode": "text",
+                                    "axisLabel": "",
+                                    "axisPlacement": "auto",
+                                    "fillOpacity": 80,
+                                    "gradientMode": "none",
+                                    "hideFrom": {
+                                        "legend": false,
+                                        "tooltip": false,
+                                        "viz": false
+                                    },
+                                    "lineWidth": 1,
+                                    "scaleDistribution": {
+                                        "type": "linear"
+                                    },
+                                    "thresholdsStyle": {
+                                        "mode": "off"
+                                    }
+                                },
+                                "thresholds": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        }
+                                    ]
+                                },
+                                "unit": "percentunit"
+                            },
+                            "overrides": [
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Now win_rate"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-green",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "24 Hours win_rate_yesterday"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-blue",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "72 Hours win_rate_72h"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-yellow",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "1 week win_rate_1w"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-purple",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Now win_rate"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-green",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "options": {
+                            "barRadius": 0,
+                            "barWidth": 0.97,
+                            "fullHighlight": false,
+                            "groupWidth": 0.7,
+                            "legend": {
+                                "calcs": [],
+                                "displayMode": "list",
+                                "placement": "bottom",
+                                "showLegend": true
+                            },
+                            "orientation": "auto",
+                            "showValue": "auto",
+                            "stacking": "none",
+                            "tooltip": {
+                                "hideZeros": false,
+                                "mode": "single",
+                                "sort": "none"
+                            },
+                            "xTickLabelRotation": 45,
+                            "xTickLabelSpacing": 0
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-25": {
+            "kind": "LibraryPanel",
+            "spec": {
+                "id": 25,
+                "libraryPanel": {
+                    "name": "Hourly Impressions Day Compare",
+                    "uid": "efkgy46u0bzeob"
+                },
+                "title": "Hourly Impressions Day Compare"
+            }
+        },
+        "panel-26": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT count() AS hours_recorded_today\nFROM default.hourly_last_72h_sums\nWHERE toDate(hour_bucket) = today();\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "A"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 26,
+                "links": [],
+                "title": "Logged Hours Today",
+                "vizConfig": {
+                    "group": "stat",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "thresholds"
+                                },
+                                "thresholds": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        },
+                                        {
+                                            "color": "red",
+                                            "value": 80
+                                        }
+                                    ]
+                                }
+                            },
+                            "overrides": []
+                        },
+                        "options": {
+                            "colorMode": "value",
+                            "graphMode": "area",
+                            "justifyMode": "auto",
+                            "orientation": "auto",
+                            "percentChangeColorMode": "standard",
+                            "reduceOptions": {
+                                "calcs": [
+                                    "lastNotNull"
+                                ],
+                                "fields": "",
+                                "values": false
+                            },
+                            "showPercentChange": false,
+                            "textMode": "auto",
+                            "wideLayout": true
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-27": {
+            "kind": "LibraryPanel",
+            "spec": {
+                "id": 27,
+                "libraryPanel": {
+                    "name": "Hourly Requests Day Compare",
+                    "uid": "dfkgy7ool6134d"
+                },
+                "title": "Hourly Requests Day Compare"
+            }
+        },
+        "panel-28": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 0,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "timeseries",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) AS Impressions\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Now"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  toStartOfHour(ts_shifted) AS time,\n  sum(Impressions) AS Impressions_last_month\nFROM default.v_impressions_last_month_same_weekday\nWHERE $__timeFilter(ts_shifted)\n  AND toStartOfHour(ts_shifted) < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Same Day Last Month"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  time,\n  sum(Impressions) AS Impressions_2mo_ago\nFROM default.v_impressions_same_weekday_2mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND time < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "2 months ago"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  time,\n  sum(Impressions) AS Impressions_3mo_ago\nFROM default.v_impressions_same_weekday_3mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND time < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "3 months ago"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 28,
+                "links": [],
+                "title": "Hourly Impressions Month Compare",
+                "vizConfig": {
+                    "group": "barchart",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "thresholds"
+                                },
+                                "custom": {
+                                    "axisBorderShow": false,
+                                    "axisCenteredZero": false,
+                                    "axisColorMode": "text",
+                                    "axisLabel": "",
+                                    "axisPlacement": "auto",
+                                    "fillOpacity": 80,
+                                    "gradientMode": "none",
+                                    "hideFrom": {
+                                        "legend": false,
+                                        "tooltip": false,
+                                        "viz": false
+                                    },
+                                    "lineWidth": 1,
+                                    "scaleDistribution": {
+                                        "type": "linear"
+                                    },
+                                    "thresholdsStyle": {
+                                        "mode": "off"
+                                    }
+                                },
+                                "thresholds": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        }
+                                    ]
+                                },
+                                "unit": "locale"
+                            },
+                            "overrides": [
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Now Impressions"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-green",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Same Day Last Month Impressions_last_month"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-blue",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "2 months ago Impressions_2mo_ago"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-yellow",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "3 months ago Impressions_3mo_ago"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-purple",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "options": {
+                            "barRadius": 0,
+                            "barWidth": 0.97,
+                            "fullHighlight": false,
+                            "groupWidth": 0.7,
+                            "legend": {
+                                "calcs": [],
+                                "displayMode": "list",
+                                "placement": "bottom",
+                                "showLegend": true
+                            },
+                            "orientation": "auto",
+                            "showValue": "auto",
+                            "stacking": "none",
+                            "tooltip": {
+                                "hideZeros": false,
+                                "mode": "single",
+                                "sort": "none"
+                            },
+                            "xTickLabelRotation": 45,
+                            "xTickLabelSpacing": 0
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-29": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 0,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "timeseries",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) AS Impressions\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Now"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  time,\n  sum(Impressions) AS Impressions_3mo_ago\nFROM default.v_impressions_same_weekday_3mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND time < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "3 months ago"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 29,
+                "links": [],
+                "title": "90 Day Side by Side Hourly Impressions Month Compare",
+                "vizConfig": {
+                    "group": "barchart",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "thresholds"
+                                },
+                                "custom": {
+                                    "axisBorderShow": false,
+                                    "axisCenteredZero": false,
+                                    "axisColorMode": "text",
+                                    "axisLabel": "",
+                                    "axisPlacement": "auto",
+                                    "fillOpacity": 80,
+                                    "gradientMode": "none",
+                                    "hideFrom": {
+                                        "legend": false,
+                                        "tooltip": false,
+                                        "viz": false
+                                    },
+                                    "lineWidth": 1,
+                                    "scaleDistribution": {
+                                        "type": "linear"
+                                    },
+                                    "thresholdsStyle": {
+                                        "mode": "off"
+                                    }
+                                },
+                                "thresholds": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        }
+                                    ]
+                                },
+                                "unit": "locale"
+                            },
+                            "overrides": [
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Now Impressions"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-green",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Same Day Last Month Impressions_last_month"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-blue",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "2 months ago Impressions_2mo_ago"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-yellow",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "3 months ago Impressions_3mo_ago"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-purple",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "options": {
+                            "barRadius": 0,
+                            "barWidth": 0.97,
+                            "fullHighlight": false,
+                            "groupWidth": 0.7,
+                            "legend": {
+                                "calcs": [],
+                                "displayMode": "list",
+                                "placement": "bottom",
+                                "showLegend": true
+                            },
+                            "orientation": "auto",
+                            "showValue": "auto",
+                            "stacking": "none",
+                            "tooltip": {
+                                "hideZeros": false,
+                                "mode": "single",
+                                "sort": "none"
+                            },
+                            "xTickLabelRotation": 45,
+                            "xTickLabelSpacing": 0
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-30": {
+            "kind": "LibraryPanel",
+            "spec": {
+                "id": 30,
+                "libraryPanel": {
+                    "name": "Hourly Requests Monthly Compare",
+                    "uid": "cfkgy88ote29sa"
+                },
+                "title": "Hourly Requests Monthly Compare"
+            }
+        },
+        "panel-31": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 0,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "timeseries",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_now\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Now"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  toStartOfHour(ts_shifted) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_1mo_ago\nFROM default.v_winrate_same_weekday_1mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND toStartOfHour(ts_shifted) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "last month"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  toStartOfHour(ts_shifted) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_2mo_ago\nFROM default.v_winrate_same_weekday_2mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND toStartOfHour(ts_shifted) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "2 months ago"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  toStartOfHour(ts_shifted) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_3mo_ago\nFROM default.v_winrate_same_weekday_3mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND toStartOfHour(ts_shifted) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "3 Months ago"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 31,
+                "links": [],
+                "title": "Hourly WIN Rate Monthly Compare",
+                "vizConfig": {
+                    "group": "barchart",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "thresholds"
+                                },
+                                "custom": {
+                                    "axisBorderShow": false,
+                                    "axisCenteredZero": false,
+                                    "axisColorMode": "text",
+                                    "axisLabel": "",
+                                    "axisPlacement": "auto",
+                                    "fillOpacity": 80,
+                                    "gradientMode": "none",
+                                    "hideFrom": {
+                                        "legend": false,
+                                        "tooltip": false,
+                                        "viz": false
+                                    },
+                                    "lineWidth": 1,
+                                    "scaleDistribution": {
+                                        "type": "linear"
+                                    },
+                                    "thresholdsStyle": {
+                                        "mode": "off"
+                                    }
+                                },
+                                "thresholds": {
+                                    "mode": "percentage",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        }
+                                    ]
+                                },
+                                "unit": "percentunit"
+                            },
+                            "overrides": [
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Now win_rate_now"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-green",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "last month win_rate_1mo_ago"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-blue",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "2 months ago win_rate_2mo_ago"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-yellow",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "3 Months ago win_rate_3mo_ago"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-purple",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "options": {
+                            "barRadius": 0,
+                            "barWidth": 0.97,
+                            "fullHighlight": false,
+                            "groupWidth": 0.7,
+                            "legend": {
+                                "calcs": [],
+                                "displayMode": "list",
+                                "placement": "bottom",
+                                "showLegend": true
+                            },
+                            "orientation": "auto",
+                            "showValue": "auto",
+                            "stacking": "none",
+                            "tooltip": {
+                                "hideZeros": false,
+                                "mode": "single",
+                                "sort": "none"
+                            },
+                            "xTickLabelRotation": 45,
+                            "xTickLabelSpacing": 0
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-32": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 0,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "timeseries",
+                                            "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_now\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Now"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  toStartOfHour(ts_shifted) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_3mo_ago\nFROM default.v_winrate_same_weekday_3mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND toStartOfHour(ts_shifted) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "3 Months ago"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 32,
+                "links": [],
+                "title": "90 Day Side by Side Hourly Win Rate Month Compare",
+                "vizConfig": {
+                    "group": "barchart",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "thresholds"
+                                },
+                                "custom": {
+                                    "axisBorderShow": false,
+                                    "axisCenteredZero": false,
+                                    "axisColorMode": "text",
+                                    "axisLabel": "",
+                                    "axisPlacement": "auto",
+                                    "fillOpacity": 80,
+                                    "gradientMode": "none",
+                                    "hideFrom": {
+                                        "legend": false,
+                                        "tooltip": false,
+                                        "viz": false
+                                    },
+                                    "lineWidth": 1,
+                                    "scaleDistribution": {
+                                        "type": "linear"
+                                    },
+                                    "thresholdsStyle": {
+                                        "mode": "off"
+                                    }
+                                },
+                                "thresholds": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        }
+                                    ]
+                                },
+                                "unit": "percentunit"
+                            },
+                            "overrides": [
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "Now win_rate_now"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-green",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "last month win_rate_1mo_ago"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-blue",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "2 months ago win_rate_2mo_ago"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-yellow",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "3 Months ago win_rate_3mo_ago"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "color",
+                                            "value": {
+                                                "fixedColor": "dark-purple",
+                                                "mode": "fixed"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "options": {
+                            "barRadius": 0,
+                            "barWidth": 0.97,
+                            "fullHighlight": false,
+                            "groupWidth": 0.7,
+                            "legend": {
+                                "calcs": [],
+                                "displayMode": "list",
+                                "placement": "bottom",
+                                "showLegend": true
+                            },
+                            "orientation": "auto",
+                            "showValue": "auto",
+                            "stacking": "none",
+                            "tooltip": {
+                                "hideZeros": false,
+                                "mode": "single",
+                                "sort": "none"
+                            },
+                            "xTickLabelRotation": 45,
+                            "xTickLabelSpacing": 0
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-33": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  (SELECT sum(wattage_Impressions)\n   FROM default.hourly_last_72h_sums\n   WHERE hour_bucket >= toStartOfDay(now())\n     AND hour_bucket < toStartOfHour(now()) - INTERVAL 3 HOUR)\n  /\n  nullIf(\n    (SELECT sum(wattage_Impressions)\n     FROM default.hourly_last_72h_sums\n     WHERE hour_bucket >= toStartOfDay(now() - INTERVAL 1 DAY)\n       AND hour_bucket < (toStartOfHour(now()) - INTERVAL 3 HOUR) - INTERVAL 1 DAY),\n    0\n  ) AS performance_vs_yesterday;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "A"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 33,
+                "links": [],
+                "title": "Day over day performance",
+                "vizConfig": {
+                    "group": "stat",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "thresholds"
+                                },
+                                "thresholds": {
+                                    "mode": "percentage",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        },
+                                        {
+                                            "color": "red",
+                                            "value": 60
+                                        },
+                                        {
+                                            "color": "yellow",
+                                            "value": 80
+                                        },
+                                        {
+                                            "color": "light-green",
+                                            "value": 90
+                                        },
+                                        {
+                                            "color": "green",
+                                            "value": 100
+                                        }
+                                    ]
+                                }
+                            },
+                            "overrides": [
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "performance_vs_yesterday"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "unit",
+                                            "value": "percentunit"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "options": {
+                            "colorMode": "value",
+                            "graphMode": "area",
+                            "justifyMode": "auto",
+                            "orientation": "auto",
+                            "percentChangeColorMode": "standard",
+                            "reduceOptions": {
+                                "calcs": [
+                                    "lastNotNull"
+                                ],
+                                "fields": "",
+                                "values": false
+                            },
+                            "showPercentChange": false,
+                            "textMode": "auto",
+                            "wideLayout": true
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-34": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "/* MTD hour-of-day peak times (% of month-to-date weighted win volume), with 3h cutoff */\nWITH\n  cutoff AS (\n    SELECT (toStartOfHour(now()) - INTERVAL 3 HOUR) AS cut\n  ),\n  per_hour_of_day AS (\n    SELECT\n      toHour(timestamp) AS hod,\n      sum(Impressions)  AS imps,\n      sum(Requests)     AS reqs,\n      (sum(Impressions) / nullIf(sum(Requests), 0)) AS winrate,\n      /* weighted win volume = impressions (same as imps) */\n      sum(Impressions) AS weighted_win\n    FROM default.`26_ss_dist_reporting`\n    WHERE timestamp >= toStartOfMonth((SELECT cut FROM cutoff))\n      AND timestamp <  (SELECT cut FROM cutoff)\n    GROUP BY hod\n  )\nSELECT\n  toDateTime(concat(toString(toDate(now())), ' ', lpad(toString(hod), 2, '0'), ':00:00')) AS time,\n  (weighted_win / sum(weighted_win) OVER ()) * 100 AS winrate_share_pct\nFROM per_hour_of_day\nORDER BY hod;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "A"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 34,
+                "links": [],
+                "title": "Month to date distribution",
+                "vizConfig": {
+                    "group": "barchart",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "palette-classic"
+                                },
+                                "custom": {
+                                    "axisBorderShow": false,
+                                    "axisCenteredZero": false,
+                                    "axisColorMode": "text",
+                                    "axisLabel": "",
+                                    "axisPlacement": "auto",
+                                    "fillOpacity": 80,
+                                    "gradientMode": "none",
+                                    "hideFrom": {
+                                        "legend": false,
+                                        "tooltip": false,
+                                        "viz": false
+                                    },
+                                    "lineWidth": 1,
+                                    "scaleDistribution": {
+                                        "type": "linear"
+                                    },
+                                    "thresholdsStyle": {
+                                        "mode": "off"
+                                    }
+                                },
+                                "thresholds": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        },
+                                        {
+                                            "color": "red",
+                                            "value": 80
+                                        }
+                                    ]
+                                }
+                            },
+                            "overrides": [
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "winrate_share_pct"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "unit",
+                                            "value": "percent"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "options": {
+                            "barRadius": 0,
+                            "barWidth": 0.97,
+                            "fullHighlight": false,
+                            "groupWidth": 0.7,
+                            "legend": {
+                                "calcs": [],
+                                "displayMode": "list",
+                                "placement": "bottom",
+                                "showLegend": true
+                            },
+                            "orientation": "auto",
+                            "showValue": "auto",
+                            "stacking": "none",
+                            "tooltip": {
+                                "hideZeros": false,
+                                "mode": "single",
+                                "sort": "none"
+                            },
+                            "xTickLabelRotation": 45,
+                            "xTickLabelSpacing": 0
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-35": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n  (SELECT sum(wattage_Requests)\n   FROM default.hourly_last_72h_sums\n   WHERE hour_bucket >= toStartOfDay(now())\n     AND hour_bucket < toStartOfHour(now()) - INTERVAL 3 HOUR)\n  /\n  nullIf(\n    (SELECT sum(wattage_Requests)\n     FROM default.hourly_last_72h_sums\n     WHERE hour_bucket >= toStartOfDay(now() - INTERVAL 1 DAY)\n       AND hour_bucket < (toStartOfHour(now()) - INTERVAL 3 HOUR) - INTERVAL 1 DAY),\n    0\n  ) AS performance_vs_yesterday;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "A"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 35,
+                "links": [],
+                "title": "Day over day Requests",
+                "vizConfig": {
+                    "group": "stat",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "thresholds"
+                                },
+                                "thresholds": {
+                                    "mode": "percentage",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        },
+                                        {
+                                            "color": "red",
+                                            "value": 60
+                                        },
+                                        {
+                                            "color": "yellow",
+                                            "value": 80
+                                        },
+                                        {
+                                            "color": "light-green",
+                                            "value": 90
+                                        },
+                                        {
+                                            "color": "green",
+                                            "value": 100
+                                        }
+                                    ]
+                                }
+                            },
+                            "overrides": [
+                                {
+                                    "matcher": {
+                                        "id": "byName",
+                                        "options": "performance_vs_yesterday"
+                                    },
+                                    "properties": [
+                                        {
+                                            "id": "unit",
+                                            "value": "percentunit"
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        "options": {
+                            "colorMode": "value",
+                            "graphMode": "area",
+                            "justifyMode": "auto",
+                            "orientation": "auto",
+                            "percentChangeColorMode": "standard",
+                            "reduceOptions": {
+                                "calcs": [
+                                    "lastNotNull"
+                                ],
+                                "fields": "",
+                                "values": false
+                            },
+                            "showPercentChange": false,
+                            "textMode": "auto",
+                            "wideLayout": true
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        },
+        "panel-8": {
+            "kind": "LibraryPanel",
+            "spec": {
+                "id": 8,
+                "libraryPanel": {
+                    "name": "Unique Vcasa Wattage",
+                    "uid": "efkgy4ovjxgcgc"
+                },
+                "title": "Unique Vcasa Wattage"
+            }
+        },
+        "panel-9": {
+            "kind": "Panel",
+            "spec": {
+                "data": {
+                    "kind": "QueryGroup",
+                    "spec": {
+                        "queries": [
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "builderOptions": {
+                                                "aggregates": [],
+                                                "columns": [
+                                                    {
+                                                        "alias": "timestamp",
+                                                        "custom": false,
+                                                        "name": "timestamp",
+                                                        "type": "DateTime"
+                                                    },
+                                                    {
+                                                        "alias": "Impressions",
+                                                        "custom": false,
+                                                        "name": "Impressions",
+                                                        "type": "UInt64"
+                                                    }
+                                                ],
+                                                "database": "default",
+                                                "filters": [],
+                                                "groupBy": [],
+                                                "limit": 48,
+                                                "meta": {},
+                                                "mode": "list",
+                                                "orderBy": [],
+                                                "queryType": "table",
+                                                "table": "hourly_last_72h"
+                                            },
+                                            "editorType": "sql",
+                                            "format": 0,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "aggregates": [],
+                                                    "columns": [
+                                                        {
+                                                            "alias": "timestamp",
+                                                            "custom": false,
+                                                            "name": "timestamp",
+                                                            "type": "DateTime"
+                                                        },
+                                                        {
+                                                            "alias": "Impressions",
+                                                            "custom": false,
+                                                            "name": "Impressions",
+                                                            "type": "UInt64"
+                                                        }
+                                                    ],
+                                                    "database": "default",
+                                                    "filters": [],
+                                                    "groupBy": [],
+                                                    "limit": 48,
+                                                    "meta": {},
+                                                    "mode": "list",
+                                                    "orderBy": [],
+                                                    "queryType": "table",
+                                                    "table": "hourly_last_72h"
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "timeseries",
+                                            "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) AS Impressions\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Wattage"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) AS Impressions\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n    AND startsWith(Dist, 'w_C')\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "Brightcom"
+                                }
+                            },
+                            {
+                                "kind": "PanelQuery",
+                                "spec": {
+                                    "hidden": false,
+                                    "query": {
+                                        "datasource": {
+                                            "name": "aep99bsdau1a8f"
+                                        },
+                                        "group": "grafana-clickhouse-datasource",
+                                        "kind": "DataQuery",
+                                        "spec": {
+                                            "editorType": "sql",
+                                            "format": 1,
+                                            "meta": {
+                                                "builderOptions": {
+                                                    "columns": [],
+                                                    "database": "",
+                                                    "limit": 1000,
+                                                    "mode": "list",
+                                                    "queryType": "table",
+                                                    "table": ""
+                                                }
+                                            },
+                                            "pluginVersion": "4.10.0",
+                                            "queryType": "table",
+                                            "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) AS Impressions\nFROM default.`26_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n    AND startsWith(Dist, 'w_E')\nGROUP BY time\nORDER BY time;\n"
+                                        },
+                                        "version": "v0"
+                                    },
+                                    "refId": "eSpot"
+                                }
+                            }
+                        ],
+                        "queryOptions": {},
+                        "transformations": []
+                    }
+                },
+                "description": "",
+                "id": 9,
+                "links": [],
+                "title": "Impressions (1hr)",
+                "vizConfig": {
+                    "group": "bargauge",
+                    "kind": "VizConfig",
+                    "spec": {
+                        "fieldConfig": {
+                            "defaults": {
+                                "color": {
+                                    "mode": "continuous-GrYlRd"
+                                },
+                                "thresholds": {
+                                    "mode": "absolute",
+                                    "steps": [
+                                        {
+                                            "color": "green",
+                                            "value": 0
+                                        },
+                                        {
+                                            "color": "red",
+                                            "value": 80
+                                        }
+                                    ]
+                                },
+                                "unit": "locale"
+                            },
+                            "overrides": []
+                        },
+                        "options": {
+                            "displayMode": "lcd",
+                            "legend": {
+                                "calcs": [],
+                                "displayMode": "list",
+                                "placement": "bottom",
+                                "showLegend": false
+                            },
+                            "maxVizHeight": 300,
+                            "minVizHeight": 16,
+                            "minVizWidth": 8,
+                            "namePlacement": "auto",
+                            "orientation": "auto",
+                            "reduceOptions": {
+                                "calcs": [
+                                    "lastNotNull"
+                                ],
+                                "fields": "",
+                                "values": false
+                            },
+                            "showUnfilled": true,
+                            "sizing": "auto",
+                            "valueMode": "color"
+                        }
+                    },
+                    "version": "12.3.3"
+                }
+            }
+        }
+    },
+    "id": 37,
+    "layout": {
+        "kind": "GridLayout",
+        "spec": {
+            "items": [
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-26"
+                        },
+                        "height": 4,
+                        "width": 2,
+                        "x": 0,
+                        "y": 0
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-33"
+                        },
+                        "height": 4,
+                        "width": 2,
+                        "x": 2,
+                        "y": 0
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-35"
+                        },
+                        "height": 4,
+                        "width": 2,
+                        "x": 4,
+                        "y": 0
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-11"
+                        },
+                        "height": 4,
+                        "width": 4,
+                        "x": 6,
+                        "y": 0
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-9"
+                        },
+                        "height": 4,
+                        "width": 4,
+                        "x": 10,
+                        "y": 0
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-10"
+                        },
+                        "height": 4,
+                        "width": 7,
+                        "x": 14,
+                        "y": 0
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-8"
+                        },
+                        "height": 4,
+                        "width": 10,
+                        "x": 0,
+                        "y": 4
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-13"
+                        },
+                        "height": 4,
+                        "width": 11,
+                        "x": 10,
+                        "y": 4
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-17"
+                        },
+                        "height": 5,
+                        "width": 10,
+                        "x": 0,
+                        "y": 8
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-15"
+                        },
+                        "height": 5,
+                        "width": 11,
+                        "x": 10,
+                        "y": 8
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-25"
+                        },
+                        "height": 12,
+                        "width": 21,
+                        "x": 0,
+                        "y": 13
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-32"
+                        },
+                        "height": 14,
+                        "width": 10,
+                        "x": 0,
+                        "y": 25
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-29"
+                        },
+                        "height": 14,
+                        "width": 11,
+                        "x": 10,
+                        "y": 25
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-24"
+                        },
+                        "height": 14,
+                        "width": 21,
+                        "x": 0,
+                        "y": 39
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-18"
+                        },
+                        "height": 14,
+                        "width": 21,
+                        "x": 0,
+                        "y": 53
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-31"
+                        },
+                        "height": 14,
+                        "width": 11,
+                        "x": 0,
+                        "y": 67
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-28"
+                        },
+                        "height": 14,
+                        "width": 10,
+                        "x": 11,
+                        "y": 67
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-27"
+                        },
+                        "height": 14,
+                        "width": 21,
+                        "x": 0,
+                        "y": 81
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-30"
+                        },
+                        "height": 14,
+                        "width": 21,
+                        "x": 0,
+                        "y": 95
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-22"
+                        },
+                        "height": 14,
+                        "width": 21,
+                        "x": 0,
+                        "y": 109
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-23"
+                        },
+                        "height": 14,
+                        "width": 21,
+                        "x": 0,
+                        "y": 123
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-19"
+                        },
+                        "height": 8,
+                        "width": 21,
+                        "x": 0,
+                        "y": 137
+                    }
+                },
+                {
+                    "kind": "GridLayoutItem",
+                    "spec": {
+                        "element": {
+                            "kind": "ElementReference",
+                            "name": "panel-34"
+                        },
+                        "height": 8,
+                        "width": 12,
+                        "x": 0,
+                        "y": 145
+                    }
+                }
+            ]
+        }
+    },
+    "links": [],
+    "liveNow": false,
+    "preload": false,
+    "tags": [],
+    "timeSettings": {
+        "autoRefresh": "",
+        "autoRefreshIntervals": [
+            "5s",
+            "10s",
+            "30s",
+            "1m",
+            "5m",
+            "15m",
+            "30m",
+            "1h",
+            "2h",
+            "1d"
+        ],
+        "fiscalYearStartMonth": 0,
+        "from": "now-24h",
+        "hideTimepicker": false,
+        "timezone": "America/Danmarkshavn",
+        "to": "now"
+    },
+    "title": "Vcasa Performance v2",
+    "uid": "ad5s8w9",
+    "variables": [],
+    "version": 12
+}

@@ -1,0 +1,230 @@
+{
+  "title": "VCASA Up / Down Monitor",
+  "uid": "vcasa-up-down",
+  "description": "Red/green status for all VCASA units. Online = seen in the most recent hourly data batch. Join: 26_ss_dist_reporting.Dist → Vcasa_to_info_seen.Dist.",
+  "tags": ["vcasa", "updown", "monitoring", "clickhouse"],
+  "timezone": "browser",
+  "refresh": "5m",
+  "time": { "from": "now-6h", "to": "now" },
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Online Now",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          },
+          "color": { "mode": "thresholds" },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "rawSql": "SELECT countIf(last_seen >= (SELECT max(last_seen) FROM default.Vcasa_to_info_seen) - INTERVAL 1 HOUR) AS online\nFROM default.Vcasa_to_info_seen",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Offline",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          },
+          "color": { "mode": "thresholds" },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "rawSql": "SELECT countIf(last_seen < (SELECT max(last_seen) FROM default.Vcasa_to_info_seen) - INTERVAL 1 HOUR) AS offline\nFROM default.Vcasa_to_info_seen",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Total Units",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "blue", "value": null }]
+          },
+          "color": { "mode": "thresholds" },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "rawSql": "SELECT count() AS total_units FROM default.Vcasa_to_info_seen",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Last Data Batch",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 0 },
+              { "color": "green", "value": 0 }
+            ]
+          },
+          "unit": "dateTimeFromNow",
+          "color": { "mode": "thresholds" },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "rawSql": "SELECT toUnixTimestamp(max(last_seen)) AS last_batch FROM default.Vcasa_to_info_seen",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "table",
+      "title": "VCASA Status — All Units",
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 24 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "options": {
+        "sortBy": [{ "displayName": "Status", "desc": false }],
+        "cellHeight": "sm",
+        "footer": { "show": false }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "inspect": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Status" },
+            "properties": [
+              { "id": "custom.displayMode", "value": "color-background" },
+              { "id": "custom.width", "value": 90 },
+              {
+                "id": "mappings",
+                "value": [
+                  { "type": "value", "options": { "0": { "text": "OFFLINE", "color": "red", "index": 0 } } },
+                  { "type": "value", "options": { "1": { "text": "ONLINE",  "color": "green", "index": 1 } } }
+                ]
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "red",   "value": null },
+                    { "color": "green", "value": 1 }
+                  ]
+                }
+              },
+              { "id": "color", "value": { "mode": "thresholds" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Last Seen" },
+            "properties": [
+              { "id": "unit", "value": "dateTimeAsLocal" },
+              { "id": "custom.width", "value": 160 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Mins Since Seen" },
+            "properties": [
+              { "id": "unit", "value": "m" },
+              { "id": "custom.width", "value": 130 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "VCASA" },
+            "properties": [{ "id": "custom.width", "value": 120 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "IP" },
+            "properties": [{ "id": "custom.width", "value": 130 }]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "rawSql": "WITH latest AS (SELECT max(last_seen) AS t FROM default.Vcasa_to_info_seen)\nSELECT\n  trim(Name)                                                             AS \"VCASA\",\n  if(last_seen >= (SELECT t FROM latest) - INTERVAL 1 HOUR, 1, 0)        AS \"Status\",\n  trim(city)                                                             AS \"City\",\n  trim(state)                                                            AS \"State\",\n  trim(ip)                                                               AS \"IP\",\n  trim(provider)                                                         AS \"Provider\",\n  toUnixTimestamp(last_seen) * 1000                                       AS \"Last Seen\",\n  dateDiff('minute', last_seen, (SELECT t FROM latest))                  AS \"Mins Since Seen\",\n  trim(Dist)                                                             AS \"Dist\"\nFROM default.Vcasa_to_info_seen\nORDER BY \"Status\" ASC, \"Mins Since Seen\" DESC",
+          "format": "table",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

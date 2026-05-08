@@ -1,0 +1,1907 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 50,
+    "links": [],
+    "panels": [
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 1,
+            "panels": [],
+            "title": "1. March manual vs database reconciliation",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*revenue|.*amount|.*variance|.*total|Yesterday|MTD|Projected|PreviousMonth|overage|threshold|gross.*|manual.*|db_.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*pct.*|.*percent.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*count|row_count|active_days|rounded_qty|raw_qty|Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 11,
+                "x": 0,
+                "y": 1
+            },
+            "id": 2,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "sql",
+                    "rawSql": "WITH\n  toDate('${march_start}') AS start_date,\n  toDate('${march_end}') AS end_date\nSELECT\n  publisher_id,\n  any(publisher_name) AS publisher_name,\n  round(sum(net_revenue), 2) AS db_march_revenue,\n  multiIf(\n    publisher_id = 2800, toFloat64(${manual_2800}),\n    publisher_id = 2948, toFloat64(${manual_2948}),\n    publisher_id = 2947, toFloat64(${manual_2947}),\n    0\n  ) AS manual_march_revenue,\n  round(\n    sum(net_revenue) -\n    multiIf(\n      publisher_id = 2800, toFloat64(${manual_2800}),\n      publisher_id = 2948, toFloat64(${manual_2948}),\n      publisher_id = 2947, toFloat64(${manual_2947}),\n      0\n    ),\n    2\n  ) AS variance,\n  round(\n    sum(net_revenue) /\n    nullIf(\n      multiIf(\n        publisher_id = 2800, toFloat64(${manual_2800}),\n        publisher_id = 2948, toFloat64(${manual_2948}),\n        publisher_id = 2947, toFloat64(${manual_2947}),\n        0\n      ),\n      0\n    ) * 100,\n    2\n  ) AS db_pct_of_manual\nFROM analytics.publisher_daily\nWHERE date >= start_date\n  AND date < end_date\n  AND publisher_id IN (2800, 2948, 2947)\nGROUP BY publisher_id\nORDER BY publisher_id",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [],
+                        "groupBy": []
+                    }
+                }
+            ],
+            "title": "Manual invoice totals vs DB March totals",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*revenue|.*amount|.*variance|.*total|Yesterday|MTD|Projected|PreviousMonth|overage|threshold|gross.*|manual.*|db_.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*pct.*|.*percent.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*count|row_count|active_days|rounded_qty|raw_qty|Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 81,
+                "w": 12,
+                "x": 11,
+                "y": 1
+            },
+            "id": 8,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "sql",
+                    "rawSql": "WITH\n  toDate('${march_start}') AS start_date,\n  toDate('${march_end}') AS end_date\nSELECT\n  date,\n  publisher_id,\n  any(publisher_name) AS publisher_name,\n  round(sum(net_revenue), 2) AS daily_revenue,\n  count() AS row_count\nFROM analytics.publisher_daily\nWHERE date >= start_date\n  AND date < end_date\n  AND publisher_id IN (2800, 2948, 2947)\nGROUP BY\n  date,\n  publisher_id\nORDER BY\n  publisher_id,\n  date",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [],
+                        "groupBy": []
+                    }
+                }
+            ],
+            "title": "March revenue by day and publisher",
+            "type": "table"
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 82
+            },
+            "id": 4,
+            "panels": [],
+            "title": "2. Reproduce dashboard math",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*revenue|.*amount|.*variance|.*total|Yesterday|MTD|Projected|PreviousMonth|overage|threshold|gross.*|manual.*|db_.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*pct.*|.*percent.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*count|row_count|active_days|rounded_qty|raw_qty|Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 3,
+                "w": 11,
+                "x": 0,
+                "y": 83
+            },
+            "id": 3,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "sql",
+                    "rawSql": "WITH\n  toDate('${march_start}') AS start_date,\n  toDate('${march_end}') AS end_date,\n  toFloat64(${manual_total}) AS manual_total\nSELECT\n  round(sum(net_revenue), 2) AS db_march_total,\n  manual_total,\n  round(sum(net_revenue) - manual_total, 2) AS variance,\n  round(sum(net_revenue) / manual_total * 100, 2) AS db_pct_of_manual\nFROM analytics.publisher_daily\nWHERE date >= start_date\n  AND date < end_date\n  AND publisher_id IN (2800, 2948, 2947)",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [],
+                        "groupBy": []
+                    }
+                }
+            ],
+            "title": "Combined March total across 2800, 2948, 2947",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*revenue|.*amount|.*variance|.*total|Yesterday|MTD|Projected|PreviousMonth|overage|threshold|gross.*|manual.*|db_.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*pct.*|.*percent.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*count|row_count|active_days|rounded_qty|raw_qty|Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 11,
+                "x": 0,
+                "y": 86
+            },
+            "id": 5,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "sql",
+                    "rawSql": "WITH\n  toDate('${ref_today}') AS ref_today\nSELECT\n  publisher_id,\n  any(publisher_name) AS publisher_name,\n  round(sumIf(day_revenue, month = toStartOfMonth(ref_today)), 2) AS current_mtd,\n  round(sumIf(day_revenue, month < toStartOfMonth(ref_today)), 2) AS previous_month,\n  round(\n    sumIf(day_revenue, month = toStartOfMonth(ref_today))\n    / nullIf(countIf(month = toStartOfMonth(ref_today)), 0)\n    * (dateDiff('day', toStartOfMonth(ref_today), toLastDayOfMonth(ref_today)) + 1),\n    2\n  ) AS projected\nFROM\n(\n  SELECT\n    publisher_id,\n    publisher_name,\n    date,\n    toStartOfMonth(date) AS month,\n    sum(net_revenue) AS day_revenue\n  FROM analytics.publisher_daily\n  WHERE date >= toStartOfMonth(ref_today) - INTERVAL 1 MONTH\n    AND date < ref_today\n    AND publisher_id IN (2800, 2948, 2947)\n  GROUP BY\n    publisher_id,\n    publisher_name,\n    date\n)\nGROUP BY publisher_id\nORDER BY publisher_id",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [],
+                        "groupBy": []
+                    }
+                }
+            ],
+            "title": "Dashboard logic reproduced using ref_today variable",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*revenue|.*amount|.*variance|.*total|Yesterday|MTD|Projected|PreviousMonth|overage|threshold|gross.*|manual.*|db_.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*pct.*|.*percent.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*count|row_count|active_days|rounded_qty|raw_qty|Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 11,
+                "x": 0,
+                "y": 91
+            },
+            "id": 6,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "sql",
+                    "rawSql": "WITH\n  latest_day AS (\n    SELECT max(date) AS latest_date\n    FROM analytics.publisher_daily\n    WHERE date < today()\n  )\nSELECT\n  (SELECT latest_date FROM latest_day) AS latest_date,\n  publisher_id,\n  any(publisher_name) AS publisher_name,\n  round(sum(net_revenue), 2) AS yesterday_revenue\nFROM analytics.publisher_daily\nWHERE date = (SELECT latest_date FROM latest_day)\n  AND publisher_id IN (2800, 2948, 2947)\nGROUP BY publisher_id\nORDER BY publisher_id",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [],
+                        "groupBy": []
+                    }
+                }
+            ],
+            "title": "Latest loaded day revenue by publisher",
+            "type": "table"
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 97
+            },
+            "id": 7,
+            "panels": [],
+            "title": "3. Daily March diagnostics",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*revenue|.*amount|.*variance|.*total|Yesterday|MTD|Projected|PreviousMonth|overage|threshold|gross.*|manual.*|db_.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*pct.*|.*percent.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*count|row_count|active_days|rounded_qty|raw_qty|Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 11,
+                "x": 0,
+                "y": 98
+            },
+            "id": 9,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "sql",
+                    "rawSql": "WITH\n  toDate('${march_start}') AS start_date,\n  toDate('${march_end}') AS end_date\nSELECT\n  ids.publisher_id,\n  calendar.date,\n  ifNull(round(rev.daily_revenue, 2), 0) AS daily_revenue\nFROM\n(\n  SELECT arrayJoin([2800, 2948, 2947]) AS publisher_id\n) AS ids\nCROSS JOIN\n(\n  SELECT start_date + number AS date\n  FROM numbers(dateDiff('day', start_date, end_date))\n) AS calendar\nLEFT JOIN\n(\n  SELECT\n    publisher_id,\n    date,\n    sum(net_revenue) AS daily_revenue\n  FROM analytics.publisher_daily\n  WHERE date >= start_date\n    AND date < end_date\n    AND publisher_id IN (2800, 2948, 2947)\n  GROUP BY\n    publisher_id,\n    date\n) AS rev\nON ids.publisher_id = rev.publisher_id\nAND calendar.date = rev.date\nWHERE ifNull(rev.daily_revenue, 0) = 0\nORDER BY\n  ids.publisher_id,\n  calendar.date",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [],
+                        "groupBy": []
+                    }
+                }
+            ],
+            "title": "Missing or zero-revenue March days",
+            "type": "table"
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 112
+            },
+            "id": 10,
+            "panels": [],
+            "title": "4. Publisher identity and scope checks",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*revenue|.*amount|.*variance|.*total|Yesterday|MTD|Projected|PreviousMonth|overage|threshold|gross.*|manual.*|db_.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*pct.*|.*percent.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*count|row_count|active_days|rounded_qty|raw_qty|Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 11,
+                "x": 0,
+                "y": 113
+            },
+            "id": 11,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "sql",
+                    "rawSql": "WITH\n  toDate('${march_start}') AS start_date,\n  toDate('${march_end}') AS end_date\nSELECT\n  publisher_id,\n  publisher_name,\n  min(date) AS first_seen,\n  max(date) AS last_seen,\n  uniqExact(date) AS active_days,\n  count() AS row_count,\n  round(sum(net_revenue), 2) AS revenue\nFROM analytics.publisher_daily\nWHERE date >= start_date\n  AND date < end_date\n  AND publisher_id IN (2800, 2948, 2947)\nGROUP BY\n  publisher_id,\n  publisher_name\nORDER BY\n  publisher_id,\n  revenue DESC",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [],
+                        "groupBy": []
+                    }
+                }
+            ],
+            "title": "Publisher names seen under target IDs",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*revenue|.*amount|.*variance|.*total|Yesterday|MTD|Projected|PreviousMonth|overage|threshold|gross.*|manual.*|db_.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*pct.*|.*percent.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*count|row_count|active_days|rounded_qty|raw_qty|Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 11,
+                "x": 0,
+                "y": 120
+            },
+            "id": 12,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "sql",
+                    "rawSql": "WITH\n  toDate('${march_start}') AS start_date,\n  toDate('${march_end}') AS end_date\nSELECT\n  publisher_id,\n  publisher_name,\n  round(sum(net_revenue), 2) AS march_revenue,\n  uniqExact(date) AS active_days,\n  count() AS row_count\nFROM analytics.publisher_daily\nWHERE date >= start_date\n  AND date < end_date\n  AND publisher_id NOT IN (2800, 2948, 2947)\n  AND\n  (\n    positionCaseInsensitive(publisher_name, 'bright') > 0\n    OR positionCaseInsensitive(publisher_name, 'bcom') > 0\n    OR positionCaseInsensitive(publisher_name, 'espot') > 0\n    OR positionCaseInsensitive(publisher_name, 'iemerge') > 0\n  )\nGROUP BY\n  publisher_id,\n  publisher_name\nORDER BY march_revenue DESC",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [],
+                        "groupBy": []
+                    }
+                }
+            ],
+            "title": "Related Brightcom / Bcom / eSpot / iEmerge rows outside target IDs",
+            "type": "table"
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 124
+            },
+            "id": 13,
+            "panels": [],
+            "title": "5. Month-to-month comparison",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*revenue|.*amount|.*variance|.*total|Yesterday|MTD|Projected|PreviousMonth|overage|threshold|gross.*|manual.*|db_.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*pct.*|.*percent.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*count|row_count|active_days|rounded_qty|raw_qty|Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "publisher_name"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 258
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 11,
+                "x": 0,
+                "y": 125
+            },
+            "id": 14,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "sql",
+                    "rawSql": "SELECT\n  toStartOfMonth(date) AS month,\n  publisher_id,\n  any(publisher_name) AS publisher_name,\n  round(sum(net_revenue), 2) AS revenue,\n  uniqExact(date) AS active_days,\n  count() AS row_count\nFROM analytics.publisher_daily\nWHERE date >= toDate('${march_start}')\n  AND date < toDate('${compare_end}')\n  AND publisher_id IN (2800, 2948, 2947)\nGROUP BY\n  month,\n  publisher_id\nORDER BY\n  month,\n  publisher_id",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [],
+                        "groupBy": []
+                    }
+                }
+            ],
+            "title": "March / April revenue comparison by publisher",
+            "type": "table"
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 133
+            },
+            "id": 15,
+            "panels": [],
+            "title": "6. Invoice revenue share math",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*revenue|.*amount|.*variance|.*total|Yesterday|MTD|Projected|PreviousMonth|overage|threshold|gross.*|manual.*|db_.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*pct.*|.*percent.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*count|row_count|active_days|rounded_qty|raw_qty|Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 13,
+                "x": 0,
+                "y": 134
+            },
+            "id": 16,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "sql",
+                    "rawSql": "WITH\n  toDate('${march_start}') AS start_date,\n  toDate('${march_end}') AS end_date\nSELECT\n  line_name,\n  round(gross_revenue, 2) AS db_gross_revenue,\n  threshold,\n  round(gross_revenue - threshold, 2) AS overage,\n  rate_per_1000,\n  round((gross_revenue - threshold) / 1000, 3) AS raw_qty,\n  round((gross_revenue - threshold) / 1000, 0) AS rounded_qty,\n  round(round((gross_revenue - threshold) / 1000, 0) * rate_per_1000, 2) AS calculated_invoice_amount\nFROM\n(\n  SELECT\n    'Brightcom / iEmerge' AS line_name,\n    sumIf(net_revenue, publisher_id IN (2800, 2948)) AS gross_revenue,\n    toFloat64(${threshold_brightcom}) AS threshold,\n    toFloat64(${rate_brightcom}) AS rate_per_1000\n  FROM analytics.publisher_daily\n  WHERE date >= start_date\n    AND date < end_date\n\n  UNION ALL\n\n  SELECT\n    'eSpot' AS line_name,\n    sumIf(net_revenue, publisher_id = 2947) AS gross_revenue,\n    toFloat64(${threshold_espot}) AS threshold,\n    toFloat64(${rate_espot}) AS rate_per_1000\n  FROM analytics.publisher_daily\n  WHERE date >= start_date\n    AND date < end_date\n)",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [],
+                        "groupBy": []
+                    }
+                }
+            ],
+            "title": "Revenue share using DB March totals",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*revenue|.*amount|.*variance|.*total|Yesterday|MTD|Projected|PreviousMonth|overage|threshold|gross.*|manual.*|db_.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*pct.*|.*percent.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*count|row_count|active_days|rounded_qty|raw_qty|Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 17,
+                "x": 0,
+                "y": 139
+            },
+            "id": 17,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "sql",
+                    "rawSql": "SELECT\n  line_name,\n  gross_revenue,\n  threshold,\n  round(gross_revenue - threshold, 2) AS overage,\n  rate_per_1000,\n  round((gross_revenue - threshold) / 1000, 3) AS raw_qty,\n  round((gross_revenue - threshold) / 1000, 0) AS rounded_qty,\n  round(round((gross_revenue - threshold) / 1000, 0) * rate_per_1000, 2) AS calculated_invoice_amount\nFROM\n(\n  SELECT\n    'Brightcom / iEmerge' AS line_name,\n    toFloat64(${manual_2800}) + toFloat64(${manual_2948}) AS gross_revenue,\n    toFloat64(${threshold_brightcom}) AS threshold,\n    toFloat64(${rate_brightcom}) AS rate_per_1000\n\n  UNION ALL\n\n  SELECT\n    'eSpot' AS line_name,\n    toFloat64(${manual_2947}) AS gross_revenue,\n    toFloat64(${threshold_espot}) AS threshold,\n    toFloat64(${rate_espot}) AS rate_per_1000\n)",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [],
+                        "groupBy": []
+                    }
+                }
+            ],
+            "title": "Revenue share using manual March totals",
+            "type": "table"
+        },
+        {
+            "collapsed": false,
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 143
+            },
+            "id": 18,
+            "panels": [],
+            "title": "7. Table structure and load sanity",
+            "type": "row"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*revenue|.*amount|.*variance|.*total|Yesterday|MTD|Projected|PreviousMonth|overage|threshold|gross.*|manual.*|db_.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*pct.*|.*percent.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*count|row_count|active_days|rounded_qty|raw_qty|Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 13,
+                "w": 6,
+                "x": 0,
+                "y": 144
+            },
+            "id": 19,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "sql",
+                    "rawSql": "DESCRIBE TABLE analytics.publisher_daily",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [],
+                        "groupBy": []
+                    }
+                }
+            ],
+            "title": "DESCRIBE analytics.publisher_daily",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*revenue|.*amount|.*variance|.*total|Yesterday|MTD|Projected|PreviousMonth|overage|threshold|gross.*|manual.*|db_.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*pct.*|.*percent.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*count|row_count|active_days|rounded_qty|raw_qty|Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            },
+                            {
+                                "id": "custom.align",
+                                "value": "right"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 11,
+                "x": 6,
+                "y": 144
+            },
+            "id": 20,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "queryType": "sql",
+                    "rawSql": "SELECT\n  publisher_id,\n  any(publisher_name) AS publisher_name,\n  round(sum(net_revenue), 2) AS revenue,\n  min(date) AS min_revenue_date,\n  max(date) AS max_revenue_date,\n  uniqExact(date) AS active_days,\n  count() AS row_count\nFROM analytics.publisher_daily\nWHERE publisher_id IN (2800, 2948, 2947)\n  AND date >= toDate('${march_start}')\n  AND date < toDate('${march_end}')\nGROUP BY publisher_id\nORDER BY publisher_id",
+                    "refId": "A",
+                    "sql": {
+                        "columns": [],
+                        "groupBy": []
+                    }
+                }
+            ],
+            "title": "March load sanity by publisher",
+            "type": "table"
+        }
+    ],
+    "preload": false,
+    "refresh": "",
+    "schemaVersion": 42,
+    "tags": [
+        "troubleshooting",
+        "revenue",
+        "clickhouse"
+    ],
+    "templating": {
+        "list": [
+            {
+                "current": {
+                    "text": "ClickHouse",
+                    "value": "aep99bsdau1a8f"
+                },
+                "includeAll": false,
+                "label": "Datasource",
+                "name": "datasource",
+                "options": [],
+                "query": "grafana-clickhouse-datasource",
+                "refresh": 1,
+                "regex": "",
+                "type": "datasource"
+            },
+            {
+                "current": {
+                    "text": "2026-03-01",
+                    "value": "2026-03-01"
+                },
+                "hide": 2,
+                "label": "March start",
+                "name": "march_start",
+                "query": "2026-03-01",
+                "skipUrlSync": true,
+                "type": "constant"
+            },
+            {
+                "current": {
+                    "text": "2026-04-01",
+                    "value": "2026-04-01"
+                },
+                "hide": 2,
+                "label": "March end",
+                "name": "march_end",
+                "query": "2026-04-01",
+                "skipUrlSync": true,
+                "type": "constant"
+            },
+            {
+                "current": {
+                    "text": "2026-05-01",
+                    "value": "2026-05-01"
+                },
+                "hide": 2,
+                "label": "Compare end",
+                "name": "compare_end",
+                "query": "2026-05-01",
+                "skipUrlSync": true,
+                "type": "constant"
+            },
+            {
+                "current": {
+                    "text": "2026-04-30",
+                    "value": "2026-04-30"
+                },
+                "hide": 2,
+                "label": "Reference today",
+                "name": "ref_today",
+                "query": "2026-04-30",
+                "skipUrlSync": true,
+                "type": "constant"
+            },
+            {
+                "current": {
+                    "text": "220710.56",
+                    "value": "220710.56"
+                },
+                "hide": 2,
+                "label": "Manual 2800",
+                "name": "manual_2800",
+                "query": "220710.56",
+                "skipUrlSync": true,
+                "type": "constant"
+            },
+            {
+                "current": {
+                    "text": "262139.80",
+                    "value": "262139.80"
+                },
+                "hide": 2,
+                "label": "Manual 2948",
+                "name": "manual_2948",
+                "query": "262139.80",
+                "skipUrlSync": true,
+                "type": "constant"
+            },
+            {
+                "current": {
+                    "text": "43751.33",
+                    "value": "43751.33"
+                },
+                "hide": 2,
+                "label": "Manual 2947",
+                "name": "manual_2947",
+                "query": "43751.33",
+                "skipUrlSync": true,
+                "type": "constant"
+            },
+            {
+                "current": {
+                    "text": "526601.69",
+                    "value": "526601.69"
+                },
+                "hide": 2,
+                "label": "Manual total",
+                "name": "manual_total",
+                "query": "526601.69",
+                "skipUrlSync": true,
+                "type": "constant"
+            },
+            {
+                "current": {
+                    "text": "204000.00",
+                    "value": "204000.00"
+                },
+                "hide": 2,
+                "label": "Brightcom threshold",
+                "name": "threshold_brightcom",
+                "query": "204000.00",
+                "skipUrlSync": true,
+                "type": "constant"
+            },
+            {
+                "current": {
+                    "text": "22.70",
+                    "value": "22.70"
+                },
+                "hide": 2,
+                "label": "Brightcom rate",
+                "name": "rate_brightcom",
+                "query": "22.70",
+                "skipUrlSync": true,
+                "type": "constant"
+            },
+            {
+                "current": {
+                    "text": "5394.00",
+                    "value": "5394.00"
+                },
+                "hide": 2,
+                "label": "eSpot threshold",
+                "name": "threshold_espot",
+                "query": "5394.00",
+                "skipUrlSync": true,
+                "type": "constant"
+            },
+            {
+                "current": {
+                    "text": "24.50",
+                    "value": "24.50"
+                },
+                "hide": 2,
+                "label": "eSpot rate",
+                "name": "rate_espot",
+                "query": "24.50",
+                "skipUrlSync": true,
+                "type": "constant"
+            }
+        ]
+    },
+    "time": {
+        "from": "2026-03-01T00:00:00.000Z",
+        "to": "2026-04-30T23:59:59.000Z"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "Troubleshoot and Test Dashboard",
+    "uid": "troubleshoot-test-dashboard",
+    "version": 2,
+    "weekStart": ""
+}

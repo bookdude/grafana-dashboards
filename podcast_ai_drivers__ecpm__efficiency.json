@@ -1,0 +1,630 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 30,
+    "links": [],
+    "panels": [
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "grafana-clickhouse-datasource"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "hideFrom": {
+                            "viz": false
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 11,
+                "w": 12,
+                "x": 0,
+                "y": 0
+            },
+            "id": 1,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "query": "SELECT toStartOfHour(ts) AS time, avg(`eCPM (USD)`) AS ecpm FROM podcast_splits WHERE $__timeFilter(ts) GROUP BY time ORDER BY time",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  feature,\n  importance\nFROM podcast_ai_driver_importance\nWHERE run_time = (SELECT max(run_time) FROM podcast_ai_driver_importance)\n  AND target = 'ecpm'\nORDER BY importance DESC\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "eCPM (hourly) + 24h rolling",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "grafana-clickhouse-datasource"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "hideFrom": {
+                            "viz": false
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 11,
+                "w": 12,
+                "x": 12,
+                "y": 0
+            },
+            "id": 2,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "query": "SELECT toStartOfHour(ts) AS time, if(sum(inventory)=0,0,sum(impressions)/sum(inventory)) AS impr_per_inv FROM podcast_splits WHERE $__timeFilter(ts) GROUP BY time ORDER BY time",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  feature,\n  importance\nFROM podcast_ai_driver_importance\nWHERE run_time = (SELECT max(run_time) FROM podcast_ai_driver_importance)\n  AND target = 'impr_per_inv'\nORDER BY importance DESC\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "Efficiency = Impressions / Inventory (hourly + rolling)",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "grafana-clickhouse-datasource"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 11
+            },
+            "id": 3,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xField": "hod",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0,
+                "yField": "avg_ecpm"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "query": "SELECT hod, avg_ecpm FROM podcast_ai_hod_ecpm_eff WHERE run_time = parseDateTimeBestEffort('${run_time}') ORDER BY hod",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  hod,\n  avg_ecpm\nFROM podcast_ai_hod_ecpm_eff\nWHERE run_time = (SELECT max(run_time) FROM podcast_ai_hod_ecpm_eff)\nORDER BY hod\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "Hour-of-day eCPM (latest AI run)",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "grafana-clickhouse-datasource"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 11
+            },
+            "id": 4,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xField": "hod",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0,
+                "yField": "avg_impr_per_inv"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "query": "SELECT hod, avg_impr_per_inv FROM podcast_ai_hod_ecpm_eff WHERE run_time = parseDateTimeBestEffort('${run_time}') ORDER BY hod",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  hod,\n  avg_impr_per_inv\nFROM podcast_ai_hod_ecpm_eff\nWHERE run_time = (SELECT max(run_time) FROM podcast_ai_hod_ecpm_eff)\nORDER BY hod\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "Hour-of-day efficiency (impressions / inventory)",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "grafana-clickhouse-datasource"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 10,
+                "w": 12,
+                "x": 0,
+                "y": 19
+            },
+            "id": 5,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "query": "SELECT feature, importance FROM podcast_ai_driver_importance WHERE run_time = parseDateTimeBestEffort('${run_time}') AND target='ecpm' ORDER BY importance DESC",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  feature,\n  importance\nFROM podcast_ai_driver_importance\nWHERE run_time = (SELECT max(run_time) FROM podcast_ai_driver_importance)\n  AND target = 'ecpm'\nORDER BY importance DESC\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "AI drivers of eCPM",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "grafana-clickhouse-datasource"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 10,
+                "w": 12,
+                "x": 12,
+                "y": 19
+            },
+            "id": 6,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "query": "SELECT feature, importance FROM podcast_ai_driver_importance WHERE run_time = parseDateTimeBestEffort('${run_time}') AND target='impr_per_inv' ORDER BY importance DESC",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  feature,\n  importance\nFROM podcast_ai_driver_importance\nWHERE run_time = (SELECT max(run_time) FROM podcast_ai_driver_importance)\n  AND target = 'impr_per_inv'\nORDER BY importance DESC\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "AI drivers of efficiency (impressions / inventory)",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "grafana-clickhouse-datasource"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 23,
+                "w": 24,
+                "x": 0,
+                "y": 29
+            },
+            "id": 7,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "query": "SELECT target, var, x, y FROM podcast_ai_driver_pdp WHERE run_time = parseDateTimeBestEffort('${run_time}') ORDER BY target, var, x",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  target, var, x, y\nFROM podcast_ai_driver_pdp\nWHERE run_time = (SELECT max(run_time) FROM podcast_ai_driver_pdp)\nORDER BY target, var, x\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "Shape curves (PDP) \u2014 where saturation & time effects appear",
+            "type": "table"
+        }
+    ],
+    "preload": false,
+    "refresh": "1m",
+    "schemaVersion": 42,
+    "tags": [
+        "clickhouse",
+        "ai",
+        "podcast"
+    ],
+    "templating": {
+        "list": [
+            {
+                "current": {},
+                "datasource": {
+                    "type": "grafana-clickhouse-datasource",
+                    "uid": "grafana-clickhouse-datasource"
+                },
+                "label": "AI Run",
+                "name": "run_time",
+                "options": [],
+                "query": "SELECT toString(max(run_time)) AS run_time FROM podcast_ai_driver_importance",
+                "refresh": 1,
+                "type": "query"
+            }
+        ]
+    },
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "Podcast AI Drivers \u2014 eCPM & Efficiency",
+    "uid": "podcast-ai-drivers",
+    "version": 10,
+    "weekStart": ""
+}

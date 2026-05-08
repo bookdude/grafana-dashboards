@@ -1,0 +1,3902 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 20,
+    "links": [],
+    "panels": [
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 4,
+                "x": 0,
+                "y": 0
+            },
+            "id": 26,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT count() AS hours_recorded_today\nFROM default.hourly_last_72h_sums\nWHERE toDate(hour_bucket) = today();\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "Logged Hours Today",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "percentage",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "percentunit"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 5,
+                "x": 4,
+                "y": 0
+            },
+            "id": 11,
+            "options": {
+                "displayMode": "lcd",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "All"
+                },
+                {
+                    "builderOptions": {
+                        "aggregates": [],
+                        "columns": [
+                            {
+                                "alias": "timestamp",
+                                "custom": false,
+                                "name": "timestamp",
+                                "type": "DateTime"
+                            },
+                            {
+                                "alias": "Impressions",
+                                "custom": false,
+                                "name": "Impressions",
+                                "type": "UInt64"
+                            }
+                        ],
+                        "database": "default",
+                        "filters": [],
+                        "groupBy": [],
+                        "limit": 48,
+                        "meta": {},
+                        "mode": "list",
+                        "orderBy": [],
+                        "queryType": "table",
+                        "table": "hourly_last_72h"
+                    },
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "aggregates": [],
+                            "columns": [
+                                {
+                                    "alias": "timestamp",
+                                    "custom": false,
+                                    "name": "timestamp",
+                                    "type": "DateTime"
+                                },
+                                {
+                                    "alias": "Impressions",
+                                    "custom": false,
+                                    "name": "Impressions",
+                                    "type": "UInt64"
+                                }
+                            ],
+                            "database": "default",
+                            "filters": [],
+                            "groupBy": [],
+                            "limit": 48,
+                            "meta": {},
+                            "mode": "list",
+                            "orderBy": [],
+                            "queryType": "table",
+                            "table": "hourly_last_72h"
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND startsWith(Dist, 'w_C')\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Brightcom"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND startsWith(Dist, 'w_E')\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "eSpot"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND startsWith(Dist, 'generated')\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "generated"
+                }
+            ],
+            "title": "WinRate (1hr)",
+            "type": "bargauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "locale"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 5,
+                "x": 9,
+                "y": 0
+            },
+            "id": 9,
+            "options": {
+                "displayMode": "lcd",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "builderOptions": {
+                        "aggregates": [],
+                        "columns": [
+                            {
+                                "alias": "timestamp",
+                                "custom": false,
+                                "name": "timestamp",
+                                "type": "DateTime"
+                            },
+                            {
+                                "alias": "Impressions",
+                                "custom": false,
+                                "name": "Impressions",
+                                "type": "UInt64"
+                            }
+                        ],
+                        "database": "default",
+                        "filters": [],
+                        "groupBy": [],
+                        "limit": 48,
+                        "meta": {},
+                        "mode": "list",
+                        "orderBy": [],
+                        "queryType": "table",
+                        "table": "hourly_last_72h"
+                    },
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 0,
+                    "meta": {
+                        "builderOptions": {
+                            "aggregates": [],
+                            "columns": [
+                                {
+                                    "alias": "timestamp",
+                                    "custom": false,
+                                    "name": "timestamp",
+                                    "type": "DateTime"
+                                },
+                                {
+                                    "alias": "Impressions",
+                                    "custom": false,
+                                    "name": "Impressions",
+                                    "type": "UInt64"
+                                }
+                            ],
+                            "database": "default",
+                            "filters": [],
+                            "groupBy": [],
+                            "limit": 48,
+                            "meta": {},
+                            "mode": "list",
+                            "orderBy": [],
+                            "queryType": "table",
+                            "table": "hourly_last_72h"
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "timeseries",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) AS Impressions\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Wattage"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) AS Impressions\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n    AND startsWith(Dist, 'w_C')\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Brightcom"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) AS Impressions\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n    AND startsWith(Dist, 'w_E')\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "eSpot"
+                }
+            ],
+            "title": "Impressions (1hr)",
+            "type": "bargauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "percentage",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "locale"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 7,
+                "x": 14,
+                "y": 0
+            },
+            "id": 10,
+            "options": {
+                "displayMode": "lcd",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "builderOptions": {
+                        "aggregates": [],
+                        "columns": [
+                            {
+                                "alias": "timestamp",
+                                "custom": false,
+                                "name": "timestamp",
+                                "type": "DateTime"
+                            },
+                            {
+                                "alias": "Impressions",
+                                "custom": false,
+                                "name": "Impressions",
+                                "type": "UInt64"
+                            }
+                        ],
+                        "database": "default",
+                        "filters": [],
+                        "groupBy": [],
+                        "limit": 48,
+                        "meta": {},
+                        "mode": "list",
+                        "orderBy": [],
+                        "queryType": "table",
+                        "table": "hourly_last_72h"
+                    },
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "aggregates": [],
+                            "columns": [
+                                {
+                                    "alias": "timestamp",
+                                    "custom": false,
+                                    "name": "timestamp",
+                                    "type": "DateTime"
+                                },
+                                {
+                                    "alias": "Impressions",
+                                    "custom": false,
+                                    "name": "Impressions",
+                                    "type": "UInt64"
+                                }
+                            ],
+                            "database": "default",
+                            "filters": [],
+                            "groupBy": [],
+                            "limit": 48,
+                            "meta": {},
+                            "mode": "list",
+                            "orderBy": [],
+                            "queryType": "table",
+                            "table": "hourly_last_72h"
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Requests) AS Requests\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Wattage"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Requests) AS Requests\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND Dist LIKE 'w_C%'\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Brightcom"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Requests) AS Requests\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND Dist LIKE 'w_E%'\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "eSpot"
+                }
+            ],
+            "title": "Requests (1hr)",
+            "type": "bargauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 10,
+                "x": 0,
+                "y": 4
+            },
+            "id": 8,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": false,
+                "sizing": "auto"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT count(DISTINCT Dist) AS hours\nFROM default.`25_ss_dist_reporting`\nWHERE Dist LIKE 'w_%'\n  AND toStartOfHour(timestamp) BETWEEN toStartOfHour(now() - INTERVAL 4 HOUR) AND toStartOfHour(now());\n",
+                    "refId": "Wattage last"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT count(DISTINCT Dist) AS today\nFROM default.`25_ss_dist_reporting`\nWHERE Dist LIKE 'w_%'\n  AND toDate(timestamp) = toDate(now());\n",
+                    "refId": "Wattage"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT count(DISTINCT Dist) AS last_24h\nFROM default.`25_ss_dist_reporting`\nWHERE Dist LIKE 'w_%'\n  AND timestamp >= now() - INTERVAL 24 HOUR;\n",
+                    "refId": "Wattage."
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT count(DISTINCT Dist) AS last_72h\nFROM default.`25_ss_dist_reporting`\nWHERE Dist LIKE 'w_%'\n  AND timestamp >= now() - INTERVAL 72 HOUR;\n",
+                    "refId": "Wattage_"
+                }
+            ],
+            "title": "Unique Vcasa Wattage",
+            "type": "gauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "percentunit"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 11,
+                "x": 10,
+                "y": 4
+            },
+            "id": 13,
+            "options": {
+                "displayMode": "lcd",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sumIf(Impressions, Dist LIKE 'w_%') / nullIf(sumIf(Requests, Dist LIKE 'w_%'), 0) AS win_rate_last_1hr\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Wattage"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT avg(wattage_winrates) AS today_winrate\nFROM default.hourly_last_72h_sums\nWHERE toDate(hour_bucket) = toDate(now());\n\n\n",
+                    "refId": "wattage"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT avg(wattage_winrates) AS last_24h_wattage_winrate\nFROM default.hourly_last_72h_sums\nWHERE hour_bucket >= toStartOfHour(now() - INTERVAL 24 HOUR);",
+                    "refId": "wattage 24Hr"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT avg(wattage_winrates) AS last_72h_wattage_winrate\nFROM default.hourly_last_72h_sums\nWHERE hour_bucket >= toStartOfHour(now() - INTERVAL 72 HOUR);",
+                    "refId": "wattage 72Hr"
+                }
+            ],
+            "title": "Wattage WinRate",
+            "type": "bargauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "locale"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 10,
+                "x": 0,
+                "y": 8
+            },
+            "id": 17,
+            "options": {
+                "displayMode": "lcd",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sumIf(Requests, Dist LIKE 'w_%') AS Requests\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Wattage last hr"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT SUM(wattage_Requests) AS Requests\nFROM default.hourly_last_72h_sums\nWHERE toDate(hour_bucket) = toDate(now());\n",
+                    "refId": "Wattage today"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT sum(wattage_Requests) AS Requests\nFROM default.hourly_last_72h_sums\nWHERE hour_bucket >= toStartOfDay(now() - INTERVAL 1 DAY)\n  AND hour_bucket < toStartOfDay(now() - INTERVAL 1 DAY) + (now() - toStartOfDay(now()));\n",
+                    "refId": "wattage yesterday until now"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT sum(wattage_Requests) AS Requests\nFROM default.hourly_last_72h_sums\nWHERE toDate(hour_bucket) = toDate(now() - INTERVAL 1 DAY);",
+                    "refId": "wattage yesterday all"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT sum(wattage_Requests) AS last_24h_all_requests\nFROM default.hourly_last_72h_sums\nWHERE hour_bucket >= now() - INTERVAL 24 HOUR;",
+                    "refId": "wattage 24Hr"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT sum(wattage_Requests) AS last_72h_all_requests\nFROM default.hourly_last_72h_sums\nWHERE hour_bucket >= now() - INTERVAL 72 HOUR;",
+                    "refId": "wattage 72Hr"
+                }
+            ],
+            "title": "Wattage Requests",
+            "type": "bargauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "locale"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 11,
+                "x": 10,
+                "y": 8
+            },
+            "id": 15,
+            "options": {
+                "displayMode": "lcd",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sumIf(Impressions, Dist LIKE 'w_%') AS Impressions\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Wattage last hr"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT sum(wattage_Impressions) AS impressions\nFROM default.hourly_last_72h_sums\nWHERE hour_bucket >= toStartOfDay(now())\n  AND hour_bucket <  (toStartOfHour(now()) - INTERVAL 3 HOUR);\n",
+                    "refId": "Wattage today"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT sum(wattage_Impressions) AS impressions\nFROM default.hourly_last_72h_sums\nWHERE hour_bucket >= toStartOfDay(now() - INTERVAL 1 DAY)\n  AND hour_bucket <  ((toStartOfHour(now()) - INTERVAL 3 HOUR) - INTERVAL 1 DAY);",
+                    "refId": "wattage yesterday until now"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT sum(wattage_Impressions) AS impressions\nFROM default.hourly_last_72h_sums\nWHERE toDate(hour_bucket) = toDate(now() - INTERVAL 1 DAY);",
+                    "refId": "wattage yesterday all"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT sum(wattage_Impressions) AS last_24h_wattage_impressions\nFROM default.hourly_last_72h_sums\nWHERE hour_bucket >= toStartOfHour(now() - INTERVAL 24 HOUR);",
+                    "refId": "wattage 24Hr"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT sum(wattage_Impressions) AS last_72h_wattage_impressions\nFROM default.hourly_last_72h_sums\nWHERE hour_bucket >= toStartOfHour(now() - INTERVAL 72 HOUR);",
+                    "refId": "wattage 72Hr"
+                }
+            ],
+            "title": "Wattage Impressions",
+            "type": "bargauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "locale"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Now Impressions"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "24 Hours Impressions_yesterday"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "72 Hours Impressions_72h"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-yellow",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "1 week Impressions_1w"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-purple",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 12,
+                "w": 21,
+                "x": 0,
+                "y": 13
+            },
+            "id": 25,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 0,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "timeseries",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) AS Impressions\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Now"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp + INTERVAL 24 HOUR) AS time,\n  sum(Impressions) AS Impressions_yesterday\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp + INTERVAL 24 HOUR)\n  AND (timestamp + INTERVAL 24 HOUR) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "24 Hours"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp + INTERVAL 72 HOUR) AS time,\n  sum(Impressions) AS Impressions_72h\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp + INTERVAL 72 HOUR)\n  AND (timestamp + INTERVAL 72 HOUR) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "72 Hours"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp + INTERVAL 168 HOUR) AS time,\n  sum(Impressions) AS Impressions_1w\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp + INTERVAL 168 HOUR)\n  AND (timestamp + INTERVAL 168 HOUR) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "1 week"
+                }
+            ],
+            "title": "Hourly Impressions Day Compare",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "percentunit"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Now win_rate_now"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "last month win_rate_1mo_ago"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "2 months ago win_rate_2mo_ago"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-yellow",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "3 Months ago win_rate_3mo_ago"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-purple",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 10,
+                "x": 0,
+                "y": 25
+            },
+            "id": 32,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 0,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "timeseries",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_now\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;",
+                    "refId": "Now"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(ts_shifted) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_3mo_ago\nFROM default.v_winrate_same_weekday_3mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND toStartOfHour(ts_shifted) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "3 Months ago"
+                }
+            ],
+            "title": "90 Day Side by Side Hourly Win Rate Month Compare",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "locale"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Now Impressions"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Same Day Last Month Impressions_last_month"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "2 months ago Impressions_2mo_ago"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-yellow",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "3 months ago Impressions_3mo_ago"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-purple",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 11,
+                "x": 10,
+                "y": 25
+            },
+            "id": 29,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 0,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "timeseries",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) AS Impressions\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Now"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  time,\n  sum(Impressions) AS Impressions_3mo_ago\nFROM default.v_impressions_same_weekday_3mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND time < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "3 months ago"
+                }
+            ],
+            "title": "90 Day Side by Side Hourly Impressions Month Compare",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "percentunit"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Now win_rate"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "24 Hours win_rate_yesterday"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "72 Hours win_rate_72h"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-yellow",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "1 week win_rate_1w"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-purple",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Now win_rate"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 21,
+                "x": 0,
+                "y": 39
+            },
+            "id": 24,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 0,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "timeseries",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Now"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp + INTERVAL 24 HOUR) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_yesterday\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp + INTERVAL 24 HOUR)\n  AND (timestamp + INTERVAL 24 HOUR) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "24 Hours"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp + INTERVAL 72 HOUR) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_72h\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp + INTERVAL 72 HOUR)\n  AND (timestamp + INTERVAL 72 HOUR) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "72 Hours"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp + INTERVAL 168 HOUR) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_1w\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp + INTERVAL 168 HOUR)\n  AND (timestamp + INTERVAL 168 HOUR) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "1 week"
+                }
+            ],
+            "title": "Hourly % Win Rate Day Compare",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "percentunit"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "All win_rate"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Brightcom win_rate"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "eSpot win_rate"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-yellow",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 21,
+                "x": 0,
+                "y": 53
+            },
+            "id": 18,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 0,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "timeseries",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "All"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND startsWith(Dist, 'w_C')\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Brightcom"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n    toStartOfHour(timestamp) AS time,\n    sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND startsWith(Dist, 'w_E')\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "eSpot"
+                }
+            ],
+            "title": "Hourly % Win Rate Brightcom - eSpot",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "percentage",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "percentunit"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Now win_rate_now"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "last month win_rate_1mo_ago"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "2 months ago win_rate_2mo_ago"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-yellow",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "3 Months ago win_rate_3mo_ago"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-purple",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 11,
+                "x": 0,
+                "y": 67
+            },
+            "id": 31,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 0,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "timeseries",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_now\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Now"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(ts_shifted) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_1mo_ago\nFROM default.v_winrate_same_weekday_1mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND toStartOfHour(ts_shifted) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "last month"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(ts_shifted) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_2mo_ago\nFROM default.v_winrate_same_weekday_2mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND toStartOfHour(ts_shifted) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "2 months ago"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(ts_shifted) AS time,\n  sum(Impressions) / nullIf(sum(Requests), 0) AS win_rate_3mo_ago\nFROM default.v_winrate_same_weekday_3mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND toStartOfHour(ts_shifted) < (toStartOfHour(now()) - INTERVAL 2 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "3 Months ago"
+                }
+            ],
+            "title": "Hourly WIN Rate Monthly Compare",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "locale"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Now Impressions"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Same Day Last Month Impressions_last_month"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "2 months ago Impressions_2mo_ago"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-yellow",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "3 months ago Impressions_3mo_ago"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-purple",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 10,
+                "x": 11,
+                "y": 67
+            },
+            "id": 28,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 0,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "timeseries",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) AS Impressions\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Now"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(ts_shifted) AS time,\n  sum(Impressions) AS Impressions_last_month\nFROM default.v_impressions_last_month_same_weekday\nWHERE $__timeFilter(ts_shifted)\n  AND toStartOfHour(ts_shifted) < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Same Day Last Month"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  time,\n  sum(Impressions) AS Impressions_2mo_ago\nFROM default.v_impressions_same_weekday_2mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND time < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "2 months ago"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  time,\n  sum(Impressions) AS Impressions_3mo_ago\nFROM default.v_impressions_same_weekday_3mo_ago\nWHERE $__timeFilter(ts_shifted)\n  AND time < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "3 months ago"
+                }
+            ],
+            "title": "Hourly Impressions Month Compare",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "locale"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Now Requests"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "24 Hours Requests_yesterday"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "72 Hours Requests_72h"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-yellow",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "1 week Requests_1w"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-purple",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 21,
+                "x": 0,
+                "y": 81
+            },
+            "id": 27,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 0,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "timeseries",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Requests) AS Requests\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 0 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Now"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp + INTERVAL 24 HOUR) AS time,\n  sum(Requests) AS Requests_yesterday\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp + INTERVAL 24 HOUR)\n  AND (timestamp + INTERVAL 24 HOUR) < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "24 Hours"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp + INTERVAL 72 HOUR) AS time,\n  sum(Requests) AS Requests_72h\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp + INTERVAL 72 HOUR)\n  AND (timestamp + INTERVAL 72 HOUR) < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "72 Hours"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp + INTERVAL 168 HOUR) AS time,\n  sum(Requests) AS Requests_1w\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp + INTERVAL 168 HOUR)\n  AND (timestamp + INTERVAL 168 HOUR) < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "1 week"
+                }
+            ],
+            "title": "Hourly Requests Day Compare",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "locale"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Now Requests"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "last month Requests_last_month"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "2 months ago Requests_2mo_ago"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-yellow",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "3 Months ago Requests_3mo_ago"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-purple",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 21,
+                "x": 0,
+                "y": 95
+            },
+            "id": 30,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 0,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "timeseries",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Requests) AS Requests\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Now"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(ts_shifted) AS time,\n  sum(Requests) AS Requests_last_month\nFROM default.v_requests_same_weekday_1mo_ago\nWHERE ts_shifted >= (toStartOfHour(now()) - INTERVAL 3 HOUR) - INTERVAL 24 HOUR\n  AND ts_shifted <  (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "last month"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(ts_shifted) AS time,\n  sum(Requests) AS Requests_2mo_ago\nFROM default.v_requests_same_weekday_2mo_ago\nWHERE ts_shifted >= (toStartOfHour(now()) - INTERVAL 3 HOUR) - INTERVAL 24 HOUR\n  AND ts_shifted <  (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "2 months ago"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(ts_shifted) AS time,\n  sum(Requests) AS Requests_3mo_ago\nFROM default.v_requests_same_weekday_3mo_ago\nWHERE ts_shifted >= (toStartOfHour(now()) - INTERVAL 3 HOUR) - INTERVAL 24 HOUR\n  AND ts_shifted <  (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "3 Months ago"
+                }
+            ],
+            "title": "Hourly Requests Monthly Compare",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "All Requests"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.axisColorMode",
+                                "value": "text"
+                            },
+                            {
+                                "id": "custom.axisColorMode",
+                                "value": "text"
+                            },
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "eSpot Requests"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-yellow",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Brightcom Requests"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Requests"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "locale"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 21,
+                "x": 0,
+                "y": 109
+            },
+            "id": 22,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 0,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "timeseries",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Requests) AS Requests\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "All"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Requests) AS Requests\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\n  AND startsWith(Dist, 'w_C')\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Brightcom"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Requests) AS Requests\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\n  AND startsWith(Dist, 'w_E')\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "eSpot"
+                }
+            ],
+            "title": "Hourly Requests",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "percentunit"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Impressions"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "locale"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Requests"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "locale"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "All Requests"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.axisColorMode",
+                                "value": "text"
+                            },
+                            {
+                                "id": "custom.axisColorMode",
+                                "value": "text"
+                            },
+                            {
+                                "id": "color",
+                                "value": {
+                                    "mode": "continuous-YlBl"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "eSpot Impressions"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-yellow",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "All Impressions"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-green",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Brigthcom Impressions"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "dark-blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 21,
+                "x": 0,
+                "y": 123
+            },
+            "id": 23,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 0,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "timeseries",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) AS Impressions\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "All"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) AS Impressions\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\n  AND Dist LIKE '%_C_%'\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "Brigthcom"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  toStartOfHour(timestamp) AS time,\n  sum(Impressions) AS Impressions\nFROM default.`25_ss_dist_reporting`\nWHERE $__timeFilter(timestamp)\n  AND timestamp < (toStartOfHour(now()) - INTERVAL 3 HOUR)\n  AND Dist LIKE '%_E_%'\nGROUP BY time\nORDER BY time;\n",
+                    "refId": "eSpot"
+                }
+            ],
+            "title": "Hourly Impressions",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "percent"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 21,
+                "x": 0,
+                "y": 137
+            },
+            "id": 19,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 0,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "timeseries",
+                    "rawSql": "WITH\n  cutoff AS (\n    SELECT (toStartOfHour(now()) - INTERVAL 3 HOUR) AS cut\n  ),\n  per_hour AS (\n    SELECT\n      toStartOfHour(timestamp) AS time,\n      sum(Impressions) AS imps,\n      sum(Requests)    AS reqs\n    FROM default.`25_ss_dist_reporting`\n    WHERE timestamp >= (SELECT cut FROM cutoff) - INTERVAL 24 HOUR\n      AND timestamp <  (SELECT cut FROM cutoff)\n    GROUP BY time\n  ),\n  per_hour_win_volume AS (\n    SELECT\n      time,\n      imps,\n      reqs,\n      imps / nullIf(reqs, 0) AS winrate,\n      imps * (imps / nullIf(reqs, 0)) AS weighted_win\n    FROM per_hour\n  )\nSELECT\n  time,\n  weighted_win / sum(weighted_win) OVER () * 100 AS winrate_share_pct\nFROM per_hour_win_volume\nORDER BY time;\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "Hourly % of Total",
+            "type": "barchart"
+        }
+    ],
+    "preload": false,
+    "schemaVersion": 42,
+    "tags": [],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-24h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "America/Danmarkshavn",
+    "title": "Vcasa Performance",
+    "uid": "fe761d0c-b314-4048-a367-8222141d2ab2",
+    "version": 120,
+    "weekStart": ""
+}

@@ -1,0 +1,1100 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 26,
+    "links": [],
+    "panels": [
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "percentage",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "orange",
+                                "value": 70
+                            },
+                            {
+                                "color": "red",
+                                "value": 85
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "total_cpu_usage_percent"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit"
+                            },
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 6,
+                "x": 0,
+                "y": 0
+            },
+            "id": 7,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "",
+                    "limit": 200,
+                    "values": true
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH (SELECT max(ts) FROM default.node_exporter_metrics) AS t_end\nSELECT\n  round(avg(util) * 100, 2) AS cpu_average\nFROM\n(\n  SELECT\n    (sys_d + user_d) / nullIf(idle_d + sys_d + user_d, 0) AS util\n  FROM\n  (\n    SELECT\n      host,\n      count() AS samples,\n      (argMax(node_cpu_idle_seconds, ts)   - argMin(node_cpu_idle_seconds, ts))   AS idle_d,\n      (argMax(node_cpu_system_seconds, ts) - argMin(node_cpu_system_seconds, ts)) AS sys_d,\n      (argMax(node_cpu_user_seconds, ts)   - argMin(node_cpu_user_seconds, ts))   AS user_d\n    FROM default.node_exporter_metrics\n    WHERE ts >= t_end - INTERVAL 10 MINUTE\n      AND ts <= t_end\n    GROUP BY host\n  )\n  WHERE samples >= 2\n    AND (idle_d + sys_d + user_d) > 0\n);\n",
+                    "refId": "B"
+                }
+            ],
+            "title": "Proxmux CPU",
+            "type": "gauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "percentage",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "orange",
+                                "value": 70
+                            },
+                            {
+                                "color": "red",
+                                "value": 85
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "total_rx_mbps"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "locale"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 4,
+                "x": 6,
+                "y": 0
+            },
+            "id": 8,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "",
+                    "limit": 200,
+                    "values": false
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH raw AS (\n  SELECT\n    host,\n    ts,\n    node_network_rx_bytes\n  FROM default.node_exporter_metrics\n  WHERE ts >= (SELECT max(ts) FROM default.node_exporter_metrics) - INTERVAL 30 MINUTE\n),\nranked AS (\n  SELECT\n    host,\n    ts,\n    node_network_rx_bytes,\n    row_number() OVER (PARTITION BY host ORDER BY ts DESC) AS rn\n  FROM raw\n),\npaired AS (\n  SELECT\n    curr.host AS host,\n    (curr.node_network_rx_bytes - prev.node_network_rx_bytes) AS rx_bytes_diff,\n    dateDiff('second', prev.ts, curr.ts) AS duration_sec\n  FROM ranked AS curr\n  INNER JOIN ranked AS prev\n    ON curr.host = prev.host\n   AND curr.rn = 1\n   AND prev.rn = 2\n  WHERE curr.node_network_rx_bytes >= prev.node_network_rx_bytes\n    AND dateDiff('second', prev.ts, curr.ts) > 0\n)\nSELECT\n  round( (sum(rx_bytes_diff) * 8.0) / nullIf(sum(duration_sec), 0), 2 ) AS total_rx_mbps\nFROM paired;\n",
+                    "refId": "B"
+                }
+            ],
+            "title": "Proxmux RX  Traffic",
+            "type": "gauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "percentage",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "orange",
+                                "value": 70
+                            },
+                            {
+                                "color": "red",
+                                "value": 85
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "total_tx_mbps"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "locale"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 4,
+                "x": 10,
+                "y": 0
+            },
+            "id": 9,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "",
+                    "limit": 200,
+                    "values": true
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH raw AS (\n  SELECT\n    host,\n    ts,\n    node_network_tx_bytes\n  FROM default.node_exporter_metrics\n  WHERE ts >= (SELECT max(ts) FROM default.node_exporter_metrics) - INTERVAL 30 MINUTE\n),\nranked AS (\n  SELECT\n    host,\n    ts,\n    node_network_tx_bytes,\n    row_number() OVER (PARTITION BY host ORDER BY ts DESC) AS rn\n  FROM raw\n),\npaired AS (\n  SELECT\n    curr.host AS host,\n    (curr.node_network_tx_bytes - prev.node_network_tx_bytes) AS tx_bytes_diff,\n    dateDiff('second', prev.ts, curr.ts) AS duration_sec\n  FROM ranked AS curr\n  INNER JOIN ranked AS prev\n    ON curr.host = prev.host\n   AND curr.rn = 1\n   AND prev.rn = 2\n  WHERE curr.node_network_tx_bytes >= prev.node_network_tx_bytes\n    AND dateDiff('second', prev.ts, curr.ts) > 0\n)\nSELECT\n  round( (sum(tx_bytes_diff) * 8.0) / nullIf(sum(duration_sec), 0), 2 ) AS total_tx_mbps\nFROM paired;\n",
+                    "refId": "B"
+                }
+            ],
+            "title": "Proxmux TX  Traffic",
+            "type": "gauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "description": "A number greater than 1 means more receive (Rx) than transmit (Tx).\n\nRatio = Rx / Tx\n\nIf ratio > 1 \u2192 receiving more data than sending\n\nIf ratio < 1 \u2192 sending more data than receiving\n\nIf ratio \u2248 1 \u2192 roughly balanced",
+            "fieldConfig": {
+                "defaults": {
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "percentage",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "orange",
+                                "value": 70
+                            },
+                            {
+                                "color": "red",
+                                "value": 85
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 3,
+                "x": 14,
+                "y": 0
+            },
+            "id": 10,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "",
+                    "limit": 200,
+                    "values": true
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH samples AS (\n  SELECT\n    host,\n    ts,\n    node_network_rx_bytes,\n    node_network_tx_bytes,\n    row_number() OVER (PARTITION BY host ORDER BY ts DESC) AS rn\n  FROM node_exporter_metrics\n  WHERE ts >= now() - INTERVAL 30 MINUTE\n    -- AND host LIKE 'prox%'  -- re-enable if you actually have prox* hosts\n),\nlatest AS (\n  SELECT * FROM samples WHERE rn = 1\n),\nprevious AS (\n  SELECT * FROM samples WHERE rn = 2\n),\ndeltas AS (\n  SELECT\n    latest.host,\n    (latest.node_network_rx_bytes - previous.node_network_rx_bytes) AS rx_diff,\n    (latest.node_network_tx_bytes - previous.node_network_tx_bytes) AS tx_diff\n  FROM latest\n  JOIN previous ON latest.host = previous.host\n  WHERE latest.node_network_rx_bytes >= previous.node_network_rx_bytes\n    AND latest.node_network_tx_bytes >= previous.node_network_tx_bytes\n)\nSELECT\n  if(\n    sum(tx_diff) = 0,\n    0,\n    round(sum(rx_diff) / sum(tx_diff), 2)\n  ) AS aggregate_rx_tx_ratio\nFROM deltas\nWHERE tx_diff > 0;\n",
+                    "refId": "B"
+                }
+            ],
+            "title": "Proxmux  Traffic Ratios",
+            "type": "gauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "description": "A number greater than 1 means more receive (Rx) than transmit (Tx).\n\nRatio = Rx / Tx\n\nIf ratio > 1 \u2192 receiving more data than sending\n\nIf ratio < 1 \u2192 sending more data than receiving\n\nIf ratio \u2248 1 \u2192 roughly balanced",
+            "fieldConfig": {
+                "defaults": {
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "percentage",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "orange",
+                                "value": 70
+                            },
+                            {
+                                "color": "red",
+                                "value": 85
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 4,
+                "x": 17,
+                "y": 0
+            },
+            "id": 11,
+            "options": {
+                "minVizHeight": 75,
+                "minVizWidth": 75,
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "",
+                    "limit": 200,
+                    "values": true
+                },
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sizing": "auto"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH diffs AS (\n  SELECT\n    host,\n    maxIf(ts, rn = 1) AS ts_new,\n    maxIf(ts, rn = 2) AS ts_old,\n    maxIf(node_network_receive_drop_total, rn = 1) AS rx_new,\n    maxIf(node_network_receive_drop_total, rn = 2) AS rx_old,\n    maxIf(node_network_transmit_drop_total, rn = 1) AS tx_new,\n    maxIf(node_network_transmit_drop_total, rn = 2) AS tx_old\n  FROM (\n    SELECT\n      host,\n      ts,\n      node_network_receive_drop_total,\n      node_network_transmit_drop_total,\n      row_number() OVER (PARTITION BY host ORDER BY ts DESC) AS rn\n    FROM node_exporter_metrics\n    WHERE ts >= now() - INTERVAL 30 MINUTE\n      -- AND host LIKE 'prox%'  -- re-enable if you actually have prox* hosts\n  )\n  GROUP BY host\n  HAVING ts_old IS NOT NULL AND ts_new > ts_old\n),\nagg AS (\n  SELECT\n    sum(rx_new - rx_old) AS sum_rx_diff,\n    sum(tx_new - tx_old) AS sum_tx_diff,\n    sum(toUnixTimestamp(ts_new) - toUnixTimestamp(ts_old)) AS sum_dt\n  FROM diffs\n)\nSELECT\n  if(\n    sum_dt = 0,\n    0,\n    round(sum_rx_diff / sum_dt, 4)\n  ) AS total_rx_drops_per_sec,\n  if(\n    sum_dt = 0,\n    0,\n    round(sum_tx_diff / sum_dt, 4)\n  ) AS total_tx_drops_per_sec\nFROM agg;\n",
+                    "refId": "B"
+                }
+            ],
+            "title": "Proxmux  Network Drops",
+            "type": "gauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 20,
+                        "gradientMode": "scheme",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "smooth",
+                        "lineWidth": 3,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": false,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 23,
+                "x": 0,
+                "y": 6
+            },
+            "id": 13,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "hidden",
+                    "placement": "right",
+                    "showLegend": false
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "/* Step 1: assign each row to an hour bucket */\nWITH samples AS (\n  SELECT\n    host,\n    toStartOfHour(ts)      AS hour,\n    ts,\n    node_network_rx_bytes\n  FROM node_exporter_metrics\n  WHERE ts >= now() - INTERVAL 24 HOUR  -- choose how far back you want to visualise\n),\n\n/* Step 2: rank samples per host per hour, newest first */\nranked AS (\n  SELECT\n    host,\n    hour,\n    ts,\n    node_network_rx_bytes,\n    row_number() OVER (\n      PARTITION BY host, hour\n      ORDER BY ts DESC\n    ) AS rn\n  FROM samples\n),\n\n/* Step 3: compute the byte\u2011difference and time\u2011difference for the two most recent samples per host per hour */\npaired AS (\n  SELECT\n    curr.hour,\n    curr.host,\n    curr.node_network_rx_bytes - prev.node_network_rx_bytes AS rx_bytes_diff,\n    dateDiff('second', prev.ts, curr.ts) AS duration_sec\n  FROM ranked AS curr\n  JOIN ranked AS prev\n    ON curr.host = prev.host\n   AND curr.hour = prev.hour\n  WHERE curr.rn = 1\n    AND prev.rn = 2\n    AND curr.node_network_rx_bytes >= prev.node_network_rx_bytes\n),\n\n/* Step 4: aggregate across hosts for each hour and compute Mbps */\nagg AS (\n  SELECT\n    hour,\n    sum(rx_bytes_diff)        AS sum_rx_bytes,\n    sum(duration_sec)         AS sum_duration,\n    count()                   AS n_pairs\n  FROM paired\n  GROUP BY hour\n)\n\nSELECT\n  hour AS ts,\n  round(\n    (sum_rx_bytes * 8) / 1024 / 1024 /\n    (sum_duration / n_pairs),\n    2\n  ) AS total_rx_mbps\nFROM agg\nORDER BY ts ASC;\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "TX Aggregate Bandwidth",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "cpu_usage_percent"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 47,
+                "w": 6,
+                "x": 0,
+                "y": 12
+            },
+            "id": 2,
+            "options": {
+                "displayMode": "basic",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "",
+                    "limit": 200,
+                    "values": true
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH latest AS (\n  SELECT\n    host,\n    argMax(node_cpu_user_seconds, ts)   AS user_sec,\n    argMax(node_cpu_system_seconds, ts) AS system_sec,\n    argMax(node_cpu_idle_seconds, ts)   AS idle_sec\n  FROM node_exporter_metrics\n  -- optional: restrict to last 30\u202fminutes if desired\n  -- WHERE ts >= now() - INTERVAL 30 MINUTE\n  GROUP BY host\n)\nSELECT\n  host,\n  round(\n    (user_sec + system_sec) /\n    (user_sec + system_sec + idle_sec) * 100,\n    2\n  ) AS cpu_usage_percent\nFROM latest\nORDER BY cpu_usage_percent DESC\nLIMIT 300;\n",
+                    "refId": "B"
+                }
+            ],
+            "title": "Proxmux CPU",
+            "type": "bargauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "cpu_usage_percent"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "none"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 47,
+                "w": 6,
+                "x": 6,
+                "y": 12
+            },
+            "id": 3,
+            "options": {
+                "displayMode": "basic",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "",
+                    "limit": 200,
+                    "values": true
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH (SELECT max(ts) FROM default.node_exporter_metrics) AS t_end\nSELECT\n  host,\n  round((rx_bytes_diff * 8.0 /1025 /1024 ) / duration_sec, 2) AS rx_mbps\nFROM\n(\n  SELECT\n    curr.host AS host,\n    (curr.node_network_rx_bytes - prev.node_network_rx_bytes) AS rx_bytes_diff,\n    dateDiff('second', prev.ts, curr.ts) AS duration_sec\n  FROM\n  (\n    SELECT\n      host, ts, node_network_rx_bytes,\n      row_number() OVER (PARTITION BY host ORDER BY ts DESC) AS rn\n    FROM default.node_exporter_metrics\n    WHERE ts <= t_end\n  ) AS curr\n  INNER JOIN\n  (\n    SELECT\n      host, ts, node_network_rx_bytes,\n      row_number() OVER (PARTITION BY host ORDER BY ts DESC) AS rn\n    FROM default.node_exporter_metrics\n    WHERE ts <= t_end\n  ) AS prev\n    ON curr.host = prev.host\n   AND curr.rn = 1\n   AND prev.rn = 2\n  WHERE curr.ts >= t_end - INTERVAL 30 MINUTE          -- host detected recently\n    AND dateDiff('second', prev.ts, curr.ts) > 0\n    AND dateDiff('second', prev.ts, curr.ts) <= 1800   -- last two samples within 30 min\n    AND curr.node_network_rx_bytes >= prev.node_network_rx_bytes\n)\nORDER BY rx_mbps DESC\nLIMIT 200;\n",
+                    "refId": "B"
+                }
+            ],
+            "title": "Proxmux RX  Traffic",
+            "type": "bargauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "cpu_usage_percent"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 47,
+                "w": 4,
+                "x": 12,
+                "y": 12
+            },
+            "id": 4,
+            "options": {
+                "displayMode": "basic",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "",
+                    "limit": 200,
+                    "values": true
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH (SELECT max(ts) FROM default.node_exporter_metrics) AS t_end\nSELECT\n  host,\n  round((tx_bytes_diff * 8.0 / 1024 / 1024) / duration_sec, 2) AS tx_mbps\nFROM\n(\n  SELECT\n    curr.host AS host,\n    (curr.node_network_tx_bytes - prev.node_network_tx_bytes) AS tx_bytes_diff,\n    dateDiff('second', prev.ts, curr.ts) AS duration_sec\n  FROM\n  (\n    SELECT\n      host, ts, node_network_tx_bytes,\n      row_number() OVER (PARTITION BY host ORDER BY ts DESC) AS rn\n    FROM default.node_exporter_metrics\n    WHERE ts <= t_end\n  ) AS curr\n  INNER JOIN\n  (\n    SELECT\n      host, ts, node_network_tx_bytes,\n      row_number() OVER (PARTITION BY host ORDER BY ts DESC) AS rn\n    FROM default.node_exporter_metrics\n    WHERE ts <= t_end\n  ) AS prev\n    ON curr.host = prev.host\n   AND curr.rn = 1\n   AND prev.rn = 2\n  WHERE curr.ts >= t_end - INTERVAL 30 MINUTE          -- host detected \u201crecently\u201d\n    AND dateDiff('second', prev.ts, curr.ts) > 0\n    AND dateDiff('second', prev.ts, curr.ts) <= 1800   -- last two samples within 30 min\n    AND curr.node_network_tx_bytes >= prev.node_network_tx_bytes\n)\nORDER BY tx_mbps DESC\nLIMIT 200;\n",
+                    "refId": "B"
+                }
+            ],
+            "title": "Proxmux TX  Traffic",
+            "type": "bargauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "description": "A number greater than 1 means more receive (Rx) than transmit (Tx).\n\nRatio = Rx / Tx\n\nIf ratio > 1 \u2192 receiving more data than sending\n\nIf ratio < 1 \u2192 sending more data than receiving\n\nIf ratio \u2248 1 \u2192 roughly balanced",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "cpu_usage_percent"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 47,
+                "w": 3,
+                "x": 16,
+                "y": 12
+            },
+            "id": 5,
+            "options": {
+                "displayMode": "basic",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "",
+                    "limit": 200,
+                    "values": true
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\n  t_end AS (SELECT max(ts) AS t FROM default.node_exporter_metrics),\n\n  samples AS (\n    SELECT\n      host,\n      ts,\n      node_network_rx_bytes,\n      node_network_tx_bytes,\n      row_number() OVER (PARTITION BY host ORDER BY ts DESC) AS rn\n    FROM default.node_exporter_metrics\n    WHERE ts >= (SELECT t FROM t_end) - INTERVAL 30 MINUTE\n      AND ts <= (SELECT t FROM t_end)\n  ),\n\n  deltas AS (\n    SELECT\n      curr.host AS host,\n      (curr.node_network_rx_bytes - prev.node_network_rx_bytes) AS rx_diff,\n      (curr.node_network_tx_bytes - prev.node_network_tx_bytes) AS tx_diff,\n      dateDiff('second', prev.ts, curr.ts) AS duration_sec\n    FROM samples AS curr\n    INNER JOIN samples AS prev\n      ON curr.host = prev.host\n     AND curr.rn = 1\n     AND prev.rn = 2\n    WHERE\n      curr.node_network_rx_bytes >= prev.node_network_rx_bytes\n      AND curr.node_network_tx_bytes >= prev.node_network_tx_bytes\n      AND dateDiff('second', prev.ts, curr.ts) > 0\n  )\n\nSELECT\n  host,\n  round(rx_diff / nullIf(tx_diff, 0), 2) AS rx_tx_ratio\nFROM deltas\nORDER BY rx_tx_ratio DESC\nLIMIT 200;\n",
+                    "refId": "B"
+                }
+            ],
+            "title": "Proxmux  Traffic Ratios",
+            "type": "bargauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "description": "A number greater than 1 means more receive (Rx) than transmit (Tx).\n\nRatio = Rx / Tx\n\nIf ratio > 1 \u2192 receiving more data than sending\n\nIf ratio < 1 \u2192 sending more data than receiving\n\nIf ratio \u2248 1 \u2192 roughly balanced",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "cpu_usage_percent"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 47,
+                "w": 4,
+                "x": 19,
+                "y": 12
+            },
+            "id": 6,
+            "options": {
+                "displayMode": "basic",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "",
+                    "limit": 200,
+                    "values": true
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\n  t_end AS (SELECT max(ts) AS t FROM default.node_exporter_metrics),\n  raw AS (\n    SELECT\n      host,\n      ts,\n      node_network_receive_drop_total  AS rx_drop,\n      node_network_transmit_drop_total AS tx_drop,\n      row_number() OVER (PARTITION BY host ORDER BY ts DESC) AS rn\n    FROM default.node_exporter_metrics\n    WHERE ts >= (SELECT t FROM t_end) - INTERVAL 30 MINUTE\n      AND ts <= (SELECT t FROM t_end)\n  ),\n  paired AS (\n    SELECT\n      host,\n      maxIf(ts, rn = 1) AS ts_new,\n      maxIf(ts, rn = 2) AS ts_old,\n      maxIf(rx_drop, rn = 1) AS rx_new,\n      maxIf(rx_drop, rn = 2) AS rx_old,\n      maxIf(tx_drop, rn = 1) AS tx_new,\n      maxIf(tx_drop, rn = 2) AS tx_old\n    FROM raw\n    GROUP BY host\n  )\nSELECT\n  host,\n  round(greatest(rx_new - rx_old, 0) / nullIf(dateDiff('second', ts_old, ts_new), 0), 6) AS rx_drops_per_sec,\n  round(greatest(tx_new - tx_old, 0) / nullIf(dateDiff('second', ts_old, ts_new), 0), 6) AS tx_drops_per_sec\nFROM paired\nWHERE ts_old IS NOT NULL\nORDER BY rx_drops_per_sec DESC\nLIMIT 200;\n",
+                    "refId": "B"
+                }
+            ],
+            "title": "Proxmux  Network Drops",
+            "type": "bargauge"
+        }
+    ],
+    "preload": false,
+    "refresh": "15m",
+    "schemaVersion": 42,
+    "tags": [],
+    "templating": {
+        "list": [
+            {
+                "current": {
+                    "text": "",
+                    "value": ""
+                },
+                "datasource": {
+                    "type": "grafana-clickhouse-datasource",
+                    "uid": "aep99bsdau1a8f"
+                },
+                "definition": "SELECT host\nFROM node_exporter_metrics\nWHERE ts >= now() - INTERVAL 30 minute\n  AND host LIKE 'prox%'\nGROUP BY host\nORDER BY host\n",
+                "name": "host",
+                "options": [],
+                "query": "SELECT host\nFROM node_exporter_metrics\nWHERE ts >= now() - INTERVAL 30 minute\n  AND host LIKE 'prox%'\nGROUP BY host\nORDER BY host\n",
+                "refresh": 1,
+                "regex": "",
+                "type": "query"
+            }
+        ]
+    },
+    "time": {
+        "from": "now-24h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "Proxmux",
+    "uid": "1c139541-b813-4fa8-b46a-cd8f8be0fb2e",
+    "version": 62,
+    "weekStart": ""
+}

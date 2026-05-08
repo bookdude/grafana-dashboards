@@ -1,0 +1,264 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 52,
+    "links": [],
+    "panels": [
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "hideFrom": {
+                            "viz": false
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Estimated Revenue"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "% of Dists"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "% of Revenue"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Average eCPM"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currencyUSD"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 3,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\ndist_base AS\n(\n    SELECT\n        Dist,\n        sum(Requests) AS requests,\n        sum(Impressions) AS impressions,\n        toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0) AS win_rate,\n        min(timestamp) AS first_seen,\n        max(timestamp) AS last_seen,\n        countDistinct(toStartOfHour(timestamp)) AS hours_seen\n    FROM default.`26_ss_dist_reporting`\n    WHERE $__timeFilter(timestamp)\n      AND NOT startsWith(Dist, 'generated_')\n    GROUP BY Dist\n),\n\nrevenue_total AS\n(\n    SELECT\n        sum(net_revenue) AS total_revenue,\n        sum(impressions) AS total_revenue_impressions,\n        sum(net_revenue) * 1000.0 / nullIf(sum(impressions), 0) AS avg_ecpm\n    FROM analytics.publisher_daily\n    WHERE $__timeFilter(date)\n),\n\nvalued AS\n(\n    SELECT\n        d.Dist,\n        d.requests,\n        d.impressions,\n        d.win_rate,\n        d.first_seen,\n        d.last_seen,\n        d.hours_seen,\n\n        r.avg_ecpm,\n\n        d.impressions * r.avg_ecpm / 1000.0 AS est_revenue\n    FROM dist_base AS d\n    CROSS JOIN revenue_total AS r\n),\n\nthresholds AS\n(\n    SELECT\n        quantileExact(0.80)(est_revenue) AS p80,\n        quantileExact(0.90)(est_revenue) AS p90,\n        quantileExact(0.95)(est_revenue) AS p95,\n        quantileExact(0.99)(est_revenue) AS p99\n    FROM valued\n),\n\nscored AS\n(\n    SELECT\n        v.Dist,\n        v.requests,\n        v.impressions,\n        v.win_rate,\n        v.first_seen,\n        v.last_seen,\n        v.hours_seen,\n        v.avg_ecpm,\n        v.est_revenue,\n\n        p.p80,\n        p.p90,\n        p.p95,\n        p.p99,\n\n        multiIf(\n            v.est_revenue >= p.p99, 'Top 1% / Extreme Outlier',\n            v.est_revenue >= p.p95, 'Top 5% / Outlier',\n            v.est_revenue >= p.p90, 'Top 10% / Elite',\n            v.est_revenue >= p.p80, 'Top 20% / Strong',\n            'Base / Bottom 80%'\n        ) AS tier,\n\n        multiIf(\n            v.est_revenue >= p.p99, 5,\n            v.est_revenue >= p.p95, 4,\n            v.est_revenue >= p.p90, 3,\n            v.est_revenue >= p.p80, 2,\n            1\n        ) AS capacity_multiplier,\n\n        multiIf(\n            v.est_revenue >= p.p99, 1,\n            v.est_revenue >= p.p95, 2,\n            v.est_revenue >= p.p90, 3,\n            v.est_revenue >= p.p80, 4,\n            5\n        ) AS sort_order\n    FROM valued AS v\n    CROSS JOIN thresholds AS p\n),\n\ntiered AS\n(\n    SELECT\n        sort_order,\n        tier,\n\n        multiIf(\n            tier = 'Top 1% / Extreme Outlier', concat('>= $', toString(round(any(p99), 2))),\n            tier = 'Top 5% / Outlier', concat('>= $', toString(round(any(p95), 2))),\n            tier = 'Top 10% / Elite', concat('>= $', toString(round(any(p90), 2))),\n            tier = 'Top 20% / Strong', concat('>= $', toString(round(any(p80), 2))),\n            concat('< $', toString(round(any(p80), 2)))\n        ) AS threshold,\n\n        capacity_multiplier,\n        count() AS dist_count,\n        sum(requests) AS tier_requests,\n        sum(impressions) AS tier_impressions,\n        avg(avg_ecpm) AS avg_ecpm,\n        sum(est_revenue) AS tier_estimated_revenue,\n        sum(est_revenue * capacity_multiplier) AS tier_projected_revenue,\n        sum(est_revenue * capacity_multiplier) - sum(est_revenue) AS tier_incremental_revenue\n    FROM scored\n    GROUP BY\n        sort_order,\n        tier,\n        capacity_multiplier\n),\n\ntotals AS\n(\n    SELECT\n        count() AS total_dists,\n        sum(requests) AS total_requests,\n        sum(impressions) AS total_impressions,\n        sum(est_revenue) AS total_estimated_revenue,\n        sum(est_revenue * capacity_multiplier) AS total_projected_revenue\n    FROM scored\n)\n\nSELECT\n    tier AS \"Tier\",\n    threshold AS \"Revenue Threshold\",\n    dist_count AS \"# Dists\",\n\n    round(\n        100.0 * dist_count / nullIf(total_dists, 0),\n        2\n    ) AS \"% of Dists\",\n\n    round(avg_ecpm, 2) AS \"Average eCPM\",\n\n    round(tier_estimated_revenue, 2) AS \"Estimated Revenue\",\n\n    round(\n        100.0 * tier_estimated_revenue / nullIf(total_estimated_revenue, 0),\n        2\n    ) AS \"% of Revenue\",\n\n    capacity_multiplier AS \"Capacity Multiplier\",\n\n    round(tier_projected_revenue, 2) AS \"Projected Revenue\",\n\n    round(tier_incremental_revenue, 2) AS \"Incremental Revenue\",\n\n    round(\n        100.0 * tier_incremental_revenue / nullIf(total_estimated_revenue, 0),\n        2\n    ) AS \"% Lift Contribution\",\n\n    tier_impressions AS \"Impressions\",\n\n    round(\n        100.0 * tier_impressions / nullIf(total_impressions, 0),\n        2\n    ) AS \"% of Impressions\"\n\nFROM tiered\nCROSS JOIN totals\nORDER BY sort_order",
+                    "refId": "A"
+                }
+            ],
+            "title": "New panel",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Dist"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 444
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 17,
+                "w": 24,
+                "x": 0,
+                "y": 7
+            },
+            "id": 1,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true,
+                "sortBy": [
+                    {
+                        "desc": true,
+                        "displayName": "Estimated Revenue"
+                    }
+                ]
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\ndist_base AS\n(\n    SELECT\n        Dist,\n        sum(Requests) AS requests,\n        sum(Impressions) AS impressions,\n        toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0) AS win_rate,\n        min(timestamp) AS first_seen,\n        max(timestamp) AS last_seen,\n        countDistinct(toStartOfHour(timestamp)) AS hours_seen\n    FROM default.`26_ss_dist_reporting`\n    WHERE $__timeFilter(timestamp)\n      AND NOT startsWith(Dist, 'generated_')\n    GROUP BY Dist\n),\n\ndist_totals AS\n(\n    SELECT\n        sum(impressions) AS total_dist_impressions,\n        sum(requests) AS total_dist_requests\n    FROM dist_base\n),\n\nrevenue_total AS\n(\n    SELECT\n        sum(net_revenue) AS total_revenue,\n        sum(impressions) AS total_revenue_impressions,\n        sum(net_revenue) * 1000.0 / nullIf(sum(impressions), 0) AS avg_ecpm\n    FROM analytics.publisher_daily\n    WHERE $__timeFilter(date)\n)\n\nSELECT\n    d.Dist AS \"Dist\",\n\n    d.requests AS \"Requests\",\n    d.impressions AS \"Impressions\",\n\n    round(d.win_rate * 100, 2) AS \"Win Rate %\",\n\n    round(\n        100.0 * d.impressions / nullIf(t.total_dist_impressions, 0),\n        2\n    ) AS \"Impression Share %\",\n\n    round(\n        r.avg_ecpm / 1000.0,\n        6\n    ) AS \"Revenue Per Impression\",\n\n    round(\n        d.impressions * r.avg_ecpm / 1000.0,\n        2\n    ) AS \"Estimated Revenue\",\n\n    round(\n        r.avg_ecpm,\n        2\n    ) AS \"Average eCPM\",\n\n    d.hours_seen AS \"Hours Seen\",\n    d.first_seen AS \"First Seen\",\n    d.last_seen AS \"Last Seen\"\n\nFROM dist_base AS d\nCROSS JOIN dist_totals AS t\nCROSS JOIN revenue_total AS r\n\nORDER BY \"Estimated Revenue\" DESC",
+                    "refId": "A"
+                }
+            ],
+            "title": "DIST Revenues",
+            "type": "table"
+        }
+    ],
+    "preload": false,
+    "schemaVersion": 42,
+    "tags": [],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now/fy",
+        "to": "now/fy"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "New dashboard",
+    "uid": "ad7nqtn",
+    "version": 14,
+    "weekStart": ""
+}

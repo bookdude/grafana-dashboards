@@ -1,0 +1,1031 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 40,
+    "links": [],
+    "panels": [
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 15,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 9,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "right",
+                    "showLegend": true
+                },
+                "orientation": "horizontal",
+                "showValue": "never",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "/* Top 25 by impact-weighted winrate (60d), % only */\n\nWITH\n  now() AS t_now,\n  toStartOfMonth(t_now) AS t_mtd,\n  t_now - INTERVAL 30 DAY AS t_30d,\n  t_now - INTERVAL 60 DAY AS t_60d,\n\n  top25 AS\n  (\n    SELECT Dist\n    FROM\n    (\n      SELECT\n        Dist,\n        sumIf(Impressions, hour_bucket >= t_60d) AS imp_60d,\n        sumIf(Requests,    hour_bucket >= t_60d) AS req_60d,\n        (imp_60d / nullIf(req_60d,0)) AS wr_60d\n      FROM default.dist_perf_hourly\n      GROUP BY Dist\n      HAVING imp_60d >= 5000   -- hard floor, adjustable\n      ORDER BY (wr_60d * log10(imp_60d + 10)) DESC\n      LIMIT 25\n    )\n  )\n\nSELECT\n  Dist,\n\n  (sumIf(Impressions, hour_bucket >= t_mtd) /\n   nullIf(sumIf(Requests, hour_bucket >= t_mtd),0)) AS wr_mtd,\n\n  (sumIf(Impressions, hour_bucket >= t_30d) /\n   nullIf(sumIf(Requests, hour_bucket >= t_30d),0)) AS wr_30d,\n\n  (sumIf(Impressions, hour_bucket >= t_60d) /\n   nullIf(sumIf(Requests, hour_bucket >= t_60d),0)) AS wr_60d,\n\n  (sum(Impressions) / nullIf(sum(Requests),0)) AS wr_all\n\nFROM default.dist_perf_hourly\nWHERE Dist IN top25\nGROUP BY Dist\nORDER BY wr_60d DESC\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "New panel",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": false,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 15
+            },
+            "id": 8,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "/* Drilldown: single Dist WinRate */\nWITH\n  parseDateTimeBestEffort('${__from:date:iso}') AS t_from,\n  parseDateTimeBestEffort('${__to:date:iso}')   AS t_to\nSELECT\n  hour_bucket AS time,\n  Dist AS metric,\n  WinRate AS value\nFROM default.dist_perf_hourly\nWHERE hour_bucket >= t_from AND hour_bucket <= t_to\n  AND Dist = '[[dist_one]]'\nORDER BY time\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "Drilldown: single Dist WinRate",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 15
+            },
+            "id": 7,
+            "options": {
+                "displayMode": "lcd",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [],
+                    "fields": "",
+                    "values": true
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "/* Top performers: good winrate + real volume (24h) */\nWITH\n  (SELECT max(hour_bucket) FROM default.dist_perf_hourly) AS h,\n  h - INTERVAL 24 HOUR AS w24_start,\n  (SELECT gate_impressions FROM default.dist_perf_gate ORDER BY computed_at DESC LIMIT 1) AS gate_imp\nSELECT\n  Dist,\n  sum(Impressions) AS imp_24h,\n  sum(Requests)    AS req_24h,\n  (imp_24h / nullIf(req_24h, 0)) AS wr_24h\nFROM default.dist_perf_hourly\nWHERE hour_bucket >= w24_start AND hour_bucket <= h\nGROUP BY Dist\nHAVING imp_24h >= gate_imp\nORDER BY wr_24h DESC, imp_24h DESC\nLIMIT toInt32('[[rank_n]]')\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "Top performers with meaningful volume (24h)",
+            "type": "bargauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 23
+            },
+            "id": 6,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "right",
+                    "showLegend": true
+                },
+                "orientation": "horizontal",
+                "showValue": "never",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "/* High impact failures: big volume, bad winrate (24h) */\nWITH\n  (SELECT max(hour_bucket) FROM default.dist_perf_hourly) AS h,\n  h - INTERVAL 24 HOUR AS w24_start,\n  (SELECT gate_impressions FROM default.dist_perf_gate ORDER BY computed_at DESC LIMIT 1) AS gate_imp\nSELECT\n  Dist,\n  sum(Impressions) AS imp_24h,\n  sum(Requests)    AS req_24h,\n  (imp_24h / nullIf(req_24h, 0)) AS wr_24h\nFROM default.dist_perf_hourly\nWHERE hour_bucket >= w24_start AND hour_bucket <= h\nGROUP BY Dist\nHAVING imp_24h >= gate_imp\nORDER BY wr_24h ASC, imp_24h DESC\nLIMIT toInt32('[[rank_n]]')\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "High impact failures: low WinRate and high Impressions (24h)",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "hideFrom": {
+                            "viz": false
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 23
+            },
+            "id": 5,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "/* Biggest movers: 24h winrate vs prior 72h baseline */\nWITH\n  (SELECT max(hour_bucket) FROM default.dist_perf_hourly) AS h,\n  h - INTERVAL 24 HOUR AS w24_start,\n  h - INTERVAL 96 HOUR AS w96_start,          -- 24h + prior 72h\n  h - INTERVAL 24 HOUR AS base_end,\n  (SELECT gate_impressions FROM default.dist_perf_gate ORDER BY computed_at DESC LIMIT 1) AS gate_imp\nSELECT\n  Dist,\n  sumIf(Impressions, hour_bucket >= w24_start AND hour_bucket <= h) AS imp_24h,\n  sumIf(Requests,    hour_bucket >= w24_start AND hour_bucket <= h) AS req_24h,\n  (imp_24h / nullIf(req_24h, 0)) AS wr_24h,\n\n  sumIf(Impressions, hour_bucket >= w96_start AND hour_bucket < base_end) AS imp_base72h,\n  sumIf(Requests,    hour_bucket >= w96_start AND hour_bucket < base_end) AS req_base72h,\n  (imp_base72h / nullIf(req_base72h, 0)) AS wr_base72h,\n\n  (wr_24h - wr_base72h) AS wr_delta\nFROM default.dist_perf_hourly\nWHERE hour_bucket >= w96_start AND hour_bucket <= h\nGROUP BY Dist\nHAVING imp_24h >= gate_imp AND imp_base72h >= gate_imp\nORDER BY\n  if('[[rank_type]]'='top', wr_delta, -wr_delta) DESC,\n  imp_24h DESC\nLIMIT toInt32('[[rank_n]]')\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "Biggest movers: 24h winrate vs prior 72h baseline",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": false,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 31
+            },
+            "id": 4,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "/* Right now: top/bottom by WinRate, latest hour */\nWITH\n  (SELECT max(hour_bucket) FROM default.dist_perf_hourly) AS h\nSELECT\n  hour_bucket,\n  Dist,\n  Requests,\n  Impressions,\n  WinRate,\n  rank_best_wr,\n  rank_worst_wr\nFROM default.dist_perf_hourly_ranked\nWHERE hour_bucket = h\n  AND (\n    ('[[rank_type]]' = 'top' AND rank_best_wr <= toInt32('[[rank_n]]')) OR\n    ('[[rank_type]]' = 'bottom' AND rank_worst_wr <= toInt32('[[rank_n]]'))\n  )\nORDER BY\n  if('[[rank_type]]'='top', rank_best_wr, rank_worst_wr) ASC,\n  Impressions DESC\nLIMIT toInt32('[[rank_n]]')\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "Right now: Top 50 + Bottom 50 (WinRate)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": false,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 31
+            },
+            "id": 3,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "/* Latest hour snapshot - ranked view */\nWITH\n  (SELECT max(hour_bucket) FROM default.dist_perf_hourly) AS latest_hour\nSELECT\n  hour_bucket,\n  Dist,\n  Requests,\n  Impressions,\n  WinRate,\n  rank_best_wr,\n  rank_worst_wr\nFROM default.dist_perf_hourly_ranked\nWHERE hour_bucket = latest_hour\n  AND (\n    ('[[rank_type]]' = 'top' AND rank_best_wr <= toInt32('[[rank_n]]')) OR\n    ('[[rank_type]]' = 'bottom' AND rank_worst_wr <= toInt32('[[rank_n]]'))\n  )\nORDER BY\n  if('[[rank_type]]' = 'top', rank_best_wr, rank_worst_wr) ASC,\n  Impressions DESC\nLIMIT 200\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "Latest-hour snapshot table (ranked)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": false,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 39
+            },
+            "id": 2,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "/* Impressions by Dist - ranked view (variable-driven) */\nWITH\n  parseDateTimeBestEffort('${__from:date:iso}') AS t_from,\n  parseDateTimeBestEffort('${__to:date:iso}')   AS t_to\nSELECT\n  hour_bucket AS time,\n  Dist AS metric,\n  Impressions AS value\nFROM default.dist_perf_hourly_ranked\nWHERE hour_bucket >= t_from AND hour_bucket <= t_to\n  AND (\n    ('[[rank_type]]' = 'top' AND rank_best_wr <= toInt32('[[rank_n]]')) OR\n    ('[[rank_type]]' = 'bottom' AND rank_worst_wr <= toInt32('[[rank_n]]'))\n  )\nORDER BY time\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "Impressions panel (ranked view)",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": false,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 47
+            },
+            "id": 1,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "/* WinRate by Dist - ranked view (variable-driven) */\nWITH\n  parseDateTimeBestEffort('${__from:date:iso}') AS t_from,\n  parseDateTimeBestEffort('${__to:date:iso}')   AS t_to\nSELECT\n  hour_bucket AS time,\n  Dist AS metric,\n  WinRate AS value\nFROM default.dist_perf_hourly_ranked\nWHERE hour_bucket >= t_from AND hour_bucket <= t_to\n  AND (\n    ('[[rank_type]]' = 'top' AND rank_best_wr <= toInt32('[[rank_n]]')) OR\n    ('[[rank_type]]' = 'bottom' AND rank_worst_wr <= toInt32('[[rank_n]]'))\n  )\nORDER BY time\n",
+                    "refId": "A"
+                }
+            ],
+            "title": "WinRate by Dist - ranked view",
+            "type": "timeseries"
+        }
+    ],
+    "preload": false,
+    "schemaVersion": 42,
+    "tags": [],
+    "templating": {
+        "list": [
+            {
+                "current": {
+                    "text": "top",
+                    "value": "top"
+                },
+                "name": "rank_type",
+                "options": [
+                    {
+                        "selected": true,
+                        "text": "top",
+                        "value": "top"
+                    },
+                    {
+                        "selected": false,
+                        "text": "bottom",
+                        "value": "bottom"
+                    }
+                ],
+                "query": "top, bottom",
+                "type": "custom"
+            },
+            {
+                "current": {
+                    "text": "10",
+                    "value": "10"
+                },
+                "name": "rank_n",
+                "options": [
+                    {
+                        "selected": true,
+                        "text": "10",
+                        "value": "10"
+                    },
+                    {
+                        "selected": false,
+                        "text": "25",
+                        "value": "25"
+                    },
+                    {
+                        "selected": false,
+                        "text": "50",
+                        "value": "50"
+                    },
+                    {
+                        "selected": false,
+                        "text": "100",
+                        "value": "100"
+                    }
+                ],
+                "query": "10,25,50,100",
+                "type": "custom"
+            },
+            {
+                "current": {
+                    "text": "generated",
+                    "value": "generated"
+                },
+                "datasource": {
+                    "type": "grafana-clickhouse-datasource",
+                    "uid": "aep99bsdau1a8f"
+                },
+                "definition": "SELECT Dist FROM default.dist_perf_hourly GROUP BY Dist ORDER BY Dist",
+                "name": "dist_one",
+                "options": [],
+                "query": "SELECT Dist FROM default.dist_perf_hourly GROUP BY Dist ORDER BY Dist",
+                "refresh": 1,
+                "regex": "",
+                "type": "query"
+            }
+        ]
+    },
+    "time": {
+        "from": "now-24h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "WIP: New dashboard",
+    "uid": "ad8s8bc",
+    "version": 15,
+    "weekStart": ""
+}

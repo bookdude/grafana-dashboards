@@ -1,0 +1,2161 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 49,
+    "links": [],
+    "panels": [
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "currency:financial:$"
+                },
+                "overrides": []
+            },
+            "id": 20,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\n  16400.0 AS monthly_static,\n  0.0245 AS rev_rate,\n\n  (\n    SELECT max(date)\n    FROM analytics.publisher_daily\n    WHERE date < today()\n      AND publisher_name IN (${publisher:singlequote})\n  ) AS latest_d,\n\n  toStartOfMonth(latest_d) AS month_start,\n  month_start + INTERVAL 1 MONTH AS month_end,\n  dateDiff('day', month_start, month_end) AS days_in_month,\n  dateDiff('day', month_start, latest_d) + 1 AS elapsed_days,\n\n  daily AS\n  (\n    SELECT\n      date,\n      toStartOfMonth(date) AS month,\n      sum(net_revenue) AS day_revenue\n    FROM analytics.publisher_daily\n    WHERE date >= month_start - INTERVAL 1 MONTH\n      AND date <= latest_d\n      AND publisher_name IN (${publisher:singlequote})\n    GROUP BY date\n  )\n\nSELECT\n  latest_d AS time,\n\n  round(\n    monthly_static / days_in_month\n    + rev_rate * sumIf(day_revenue, date = latest_d),\n    2\n  ) AS Today,\n\n  round(\n    monthly_static * elapsed_days / days_in_month\n    + rev_rate * sumIf(day_revenue, month = month_start),\n    2\n  ) AS MTD,\n\n  round(\n    monthly_static\n    + rev_rate * (\n        sumIf(day_revenue, month = month_start)\n        / nullIf(elapsed_days, 0)\n        * days_in_month\n      ),\n    2\n  ) AS Projected,\n\n  round(\n    monthly_static\n    + rev_rate * sumIf(day_revenue, month < month_start),\n    2\n  ) AS LastMonth\n\nFROM daily;",
+                    "refId": "A"
+                }
+            ],
+            "title": "SL Rev",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "percent"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Yesterday"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "MTD"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "LastMonth"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Today"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "PreviousMonth"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 3,
+                "w": 4,
+                "x": 6,
+                "y": 0
+            },
+            "id": 4,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\n  daily AS (\n    SELECT\n      date,\n      toStartOfMonth(date) AS month,\n      sum(impressions) AS day_impressions,\n      sum(inventory) AS day_inventory\n    FROM analytics.publisher_daily\n    WHERE date >= toStartOfMonth(today()) - INTERVAL 1 MONTH\n      AND date <= today()\n      AND publisher_name IN (${publisher:singlequote})\n    GROUP BY date\n  ),\n  latest_date AS (\n    SELECT max(date) AS d FROM daily WHERE month = toStartOfMonth(today())\n  )\nSELECT\n  (SELECT d FROM latest_date) AS time,\n\n  -- Today (most recent day in current month)\n  round(\n    sumIf(day_impressions, date = (SELECT d FROM latest_date)) * 100\n      / nullIf(sumIf(day_inventory, date = (SELECT d FROM latest_date)), 0),\n    4\n  ) AS Today,\n\n  -- Yesterday (day before most recent)\n  round(\n    sumIf(day_impressions, date = (SELECT d FROM latest_date) - 1) * 100\n      / nullIf(sumIf(day_inventory, date = (SELECT d FROM latest_date) - 1), 0),\n    4\n  ) AS Yesterday,\n\n  -- Month to date\n  round(\n    sumIf(day_impressions, month = toStartOfMonth(today())) * 100\n      / nullIf(sumIf(day_inventory, month = toStartOfMonth(today())), 0),\n    4\n  ) AS MTD,\n\n  -- Previous full month\n  round(\n    sumIf(day_impressions, month < toStartOfMonth(today())) * 100\n      / nullIf(sumIf(day_inventory, month < toStartOfMonth(today())), 0),\n    4\n  ) AS PreviousMonth\n\nFROM daily",
+                    "refId": "A"
+                }
+            ],
+            "title": "Fill",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "currency:financial:$"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 3,
+                "w": 5,
+                "x": 10,
+                "y": 0
+            },
+            "id": 3,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  max(date) AS time,\n  round(sum(net_revenue) * 1000 / nullIf(sum(impressions), 0), 4) AS ecpm,\n  round(sumIf(net_revenue, publisher_id = 2947) * 1000\n        / nullIf(sumIf(impressions, publisher_id = 2947), 0), 4) AS espot,\n  round(sumIf(net_revenue, publisher_id = 2800) * 1000\n        / nullIf(sumIf(impressions, publisher_id = 2800), 0), 4) AS brightcom,\n  round(sumIf(net_revenue, publisher_id = 2948) * 1000\n        / nullIf(sumIf(impressions, publisher_id = 2948), 0), 4) AS podcasts\nFROM analytics.publisher_daily\nWHERE $__timeFilter(date)",
+                    "refId": "A"
+                }
+            ],
+            "title": "CPM",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "currency:financial:$"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 16,
+                "w": 8,
+                "x": 15,
+                "y": 0
+            },
+            "id": 18,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "text": {
+                    "titleSize": 20
+                },
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH latest_day AS (\n  SELECT max(date) AS latest_date\n  FROM analytics.publisher_daily\n  WHERE date < today()\n),\ndaily AS (\n  SELECT\n    date,\n    toStartOfMonth(date) AS month,\n    sum(net_revenue) AS day_revenue\n  FROM analytics.publisher_daily\n  WHERE date >= toStartOfMonth(today()) - INTERVAL 1 MONTH\n    AND date < today()\n    AND publisher_id = 2800\n  GROUP BY date\n),\nyesterday_rev AS (\n  SELECT\n    sum(net_revenue) AS yesterday_revenue\n  FROM analytics.publisher_daily\n  WHERE date = (SELECT latest_date FROM latest_day)\n    AND publisher_id = 2800\n)\nSELECT\n  (SELECT latest_date FROM latest_day) AS time,\n  round(ifNull((SELECT yesterday_revenue FROM yesterday_rev), 0), 2) AS Yesterday,\n  round(sumIf(day_revenue, month = toStartOfMonth(today())), 2) AS MTD,\n  round(\n    sumIf(day_revenue, month = toStartOfMonth(today()))\n    / nullIf(countIf(month = toStartOfMonth(today())), 0)\n    * (dateDiff('day', toStartOfMonth(today()), toLastDayOfMonth(today())) + 1),\n    2\n  ) AS Projected,\n  round(sumIf(day_revenue, month < toStartOfMonth(today())), 2) AS PreviousMonth\nFROM daily",
+                    "refId": "Bcom Station"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH latest_day AS (\n  SELECT max(date) AS latest_date\n  FROM analytics.publisher_daily\n  WHERE date < today()\n),\ndaily AS (\n  SELECT\n    date,\n    toStartOfMonth(date) AS month,\n    sum(net_revenue) AS day_revenue\n  FROM analytics.publisher_daily\n  WHERE date >= toStartOfMonth(today()) - INTERVAL 1 MONTH\n    AND date < today()\n    AND publisher_id = 2948\n  GROUP BY date\n),\nyesterday_rev AS (\n  SELECT\n    sum(net_revenue) AS yesterday_revenue\n  FROM analytics.publisher_daily\n  WHERE date = (SELECT latest_date FROM latest_day)\n    AND publisher_id = 2948\n)\nSELECT\n  (SELECT latest_date FROM latest_day) AS time,\n  round(ifNull((SELECT yesterday_revenue FROM yesterday_rev), 0), 2) AS Yesterday,\n  round(sumIf(day_revenue, month = toStartOfMonth(today())), 2) AS MTD,\n  round(\n    sumIf(day_revenue, month = toStartOfMonth(today()))\n    / nullIf(countIf(month = toStartOfMonth(today())), 0)\n    * (dateDiff('day', toStartOfMonth(today()), toLastDayOfMonth(today())) + 1),\n    2\n  ) AS Projected,\n  round(sumIf(day_revenue, month < toStartOfMonth(today())), 2) AS PreviousMonth\nFROM daily",
+                    "refId": "Bcom Podcast"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH latest_day AS (\n  SELECT max(date) AS latest_date\n  FROM analytics.publisher_daily\n  WHERE date < today()\n),\ndaily AS (\n  SELECT\n    date,\n    toStartOfMonth(date) AS month,\n    sum(net_revenue) AS day_revenue\n  FROM analytics.publisher_daily\n  WHERE date >= toStartOfMonth(today()) - INTERVAL 1 MONTH\n    AND date < today()\n    AND publisher_id = 2947\n  GROUP BY date\n),\nyesterday_rev AS (\n  SELECT\n    sum(net_revenue) AS yesterday_revenue\n  FROM analytics.publisher_daily\n  WHERE date = (SELECT latest_date FROM latest_day)\n    AND publisher_id = 2947\n)\nSELECT\n  (SELECT latest_date FROM latest_day) AS time,\n  round(ifNull((SELECT yesterday_revenue FROM yesterday_rev), 0), 2) AS Yesterday,\n  round(sumIf(day_revenue, month = toStartOfMonth(today())), 2) AS MTD,\n  round(\n    sumIf(day_revenue, month = toStartOfMonth(today()))\n    / nullIf(countIf(month = toStartOfMonth(today())), 0)\n    * (dateDiff('day', toStartOfMonth(today()), toLastDayOfMonth(today())) + 1),\n    2\n  ) AS Projected,\n  round(sumIf(day_revenue, month < toStartOfMonth(today())), 2) AS PreviousMonth\nFROM daily",
+                    "refId": "eSpot"
+                }
+            ],
+            "title": "Rev ",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "currency:financial:$"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 3,
+                "w": 6,
+                "x": 0,
+                "y": 3
+            },
+            "id": 5,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH daily AS (\n  SELECT\n    date,\n    toStartOfMonth(date) AS month,\n    sum(net_revenue) AS day_revenue\n  FROM analytics.publisher_daily\n  WHERE date >= toStartOfMonth(today()) - INTERVAL 1 MONTH\n    AND date < today()\n    AND publisher_name IN (${publisher:singlequote})\n  GROUP BY date\n),\nyesterday_rev AS (\n  SELECT sum(net_revenue) AS yesterday_revenue\n  FROM analytics.v_grafana_overall_latest_1\n)\nSELECT\n  maxIf(date, month = toStartOfMonth(today())) AS time,\n\n  -- Yesterday from the view (guaranteed single latest completed day)\n  round((SELECT yesterday_revenue FROM yesterday_rev), 2) AS Yesterday,\n\n  -- Month to date\n  round(sumIf(day_revenue, month = toStartOfMonth(today())), 2) AS MTD,\n\n  -- Projected month\n  round(\n    sumIf(day_revenue, month = toStartOfMonth(today()))\n      / countIf(month = toStartOfMonth(today()))\n      * (dateDiff('day', toStartOfMonth(today()), toLastDayOfMonth(today())) + 1),\n    2\n  ) AS Projected,\n\n  -- Previous full month\n  round(sumIf(day_revenue, month < toStartOfMonth(today())), 2) AS PreviousMonth\n\nFROM daily",
+                    "refId": "A"
+                }
+            ],
+            "title": "Rev ",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 3,
+                "w": 4,
+                "x": 6,
+                "y": 3
+            },
+            "id": 2,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "percentChangeColorMode": "standard",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto",
+                "wideLayout": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\n  daily AS (\n    SELECT\n      date,\n      toStartOfMonth(date) AS month,\n      sum(impressions) AS day_impressions\n    FROM analytics.publisher_daily\n    WHERE date >= toStartOfMonth(today()) - INTERVAL 1 MONTH\n      AND date <= today()\n      AND publisher_name IN (${publisher:singlequote})\n    GROUP BY date\n  ),\n  latest_date AS (\n    SELECT max(date) AS d FROM daily WHERE month = toStartOfMonth(today())\n  )\nSELECT\n  (SELECT d FROM latest_date) AS time,\n\n  -- Yesterday (most recent day of data)\n  sumIf(day_impressions, date = (SELECT d FROM latest_date)) AS Yesterday,\n\n  -- Month to date\n  sumIf(day_impressions, month = toStartOfMonth(today())) AS MTD,\n\n  -- Projected full month (straight-line from run-rate)\n  round(\n    sumIf(day_impressions, month = toStartOfMonth(today()))\n      / countIf(month = toStartOfMonth(today()))\n      * (dateDiff('day', toStartOfMonth(today()), toLastDayOfMonth(today())) + 1),\n    0\n  ) AS Projected,\n\n  -- Previous full month\n  sumIf(day_impressions, month < toStartOfMonth(today())) AS LastMonth\n\nFROM daily",
+                    "refId": "A"
+                }
+            ],
+            "title": "Impressions",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "fixedColor": "semi-dark-green",
+                        "mode": "fixed"
+                    },
+                    "decimals": 2,
+                    "mappings": [
+                        {
+                            "options": {
+                                ">70": {
+                                    "color": "red",
+                                    "index": 1
+                                },
+                                ">90": {
+                                    "color": "green",
+                                    "index": 0
+                                }
+                            },
+                            "type": "value"
+                        }
+                    ],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "percent"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "brightcom_stations_efficiency"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "espot_stations_efficiency"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "brightcom_podcasts_efficiency"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "brightcom"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "espot"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "podcasts"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 3,
+                "w": 5,
+                "x": 10,
+                "y": 3
+            },
+            "id": 15,
+            "options": {
+                "displayMode": "lcd",
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": false
+                },
+                "maxVizHeight": 300,
+                "minVizHeight": 16,
+                "minVizWidth": 8,
+                "namePlacement": "auto",
+                "orientation": "horizontal",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showUnfilled": true,
+                "sizing": "auto",
+                "valueMode": "color"
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  max(date) AS time,\n  round(sumIf(impressions, publisher_id = 2800) * 100 / nullIf(sumIf(bids_won, publisher_id = 2800), 0), 4) AS brightcom,\n  round(sumIf(impressions, publisher_id = 2947) * 100 / nullIf(sumIf(bids_won, publisher_id = 2947), 0), 4) AS espot,\n  round(sumIf(impressions, publisher_id = 2948) * 100 / nullIf(sumIf(bids_won, publisher_id = 2948), 0), 4) AS podcasts\nFROM analytics.publisher_daily\nWHERE $__timeFilter(date)\n  AND publisher_name IN (${publisher:singlequote})",
+                    "refId": "A"
+                }
+            ],
+            "title": "Win to Impression",
+            "type": "bargauge"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 25,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "auto",
+                        "showValues": true,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "currency:financial:$"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "revenue"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currency:financial:$"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 15,
+                "x": 0,
+                "y": 6
+            },
+            "id": 7,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "hidden",
+                    "placement": "right",
+                    "showLegend": false
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  date AS time,\n  round(sum(net_revenue), 2) AS revenue\nFROM analytics.publisher_daily\nWHERE $__timeFilter(date)\n  AND date < (SELECT max(date) FROM analytics.v_grafana_overall_latest_1)\n  AND publisher_name IN (${publisher:singlequote})\nGROUP BY date\n\nUNION ALL\n\nSELECT\n  time,\n  net_revenue AS revenue\nFROM analytics.v_grafana_overall_latest_1\n\nORDER BY time",
+                    "refId": "A"
+                }
+            ],
+            "title": "Overall Revenue Trend",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "always",
+                        "showValues": true,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "currency:financial:$"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 15,
+                "x": 0,
+                "y": 11
+            },
+            "id": 8,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "multi",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  date AS time,\n  round(sum(net_revenue) * 1000 / nullIf(sum(impressions), 0), 4) AS ecpm\nFROM analytics.publisher_daily\nWHERE $__timeFilter(date)\n  AND publisher_name IN (${publisher:singlequote})\nGROUP BY date\nORDER BY date",
+                    "refId": "A"
+                }
+            ],
+            "title": "Overall eCPM Trend",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "max": 100,
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "currency:financial:$"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "A Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "B Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "C Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "D Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "A Product/service"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 298
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Description"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 512
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Rate"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "unit",
+                                "value": "currency:financial:$"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Product/service"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 295
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Amount"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currency:financial:$"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 18,
+                "x": 0,
+                "y": 16
+            },
+            "id": 17,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\n  toStartOfMonth(today()) AS month_start,\n  toStartOfMonth(today()) + INTERVAL 1 MONTH AS month_end,\n  16400.00 AS static_exclusion,\n  204000.00 AS brightcom_threshold,\n  5394.00 AS espot_threshold,\n  22.70 AS brightcom_rate,\n  24.50 AS espot_rate,\n  4669.83 AS brightcom_baseline,\n  431.71 AS espot_baseline,\n  base AS\n  (\n    SELECT\n      sumIf(net_revenue, publisher_id IN (2800, 2948)) AS brightcom_gross,\n      sumIf(net_revenue, publisher_id = 2947) AS espot_gross\n    FROM analytics.publisher_daily\n    WHERE date >= month_start\n      AND date < month_end\n  )\nSELECT\n  product_service AS `Product/service`,\n  description AS `Description`,\n  amount AS `Amount`,\n  rate AS `Rate`,\n  qty AS `Qty`\nFROM\n(\n  SELECT\n    1 AS sort_order,\n    'Subscription:Baseline Monthly iEmerge' AS product_service,\n    concat('Baseline Monthly iEmerge (', monthName(month_start), ' ', toString(toYear(month_start)), ')') AS description,\n    round(brightcom_baseline, 2) AS amount,\n    round(brightcom_baseline, 2) AS rate,\n    toFloat64(1) AS qty\n  FROM base\n\n  UNION ALL\n\n  SELECT\n    2 AS sort_order,\n    'Subscription:Baseline Monthly eSpot' AS product_service,\n    concat('Baseline Monthly eSpot (', monthName(month_start), ' ', toString(toYear(month_start)), ')') AS description,\n    round(espot_baseline, 2) AS amount,\n    round(espot_baseline, 2) AS rate,\n    toFloat64(1) AS qty\n  FROM base\n\n  UNION ALL\n\n  SELECT\n    3 AS sort_order,\n    'Rev Share:iEmerge' AS product_service,\n    concat('Rev Share iEmerge (', monthName(month_start), ' ', toString(toYear(month_start)), ')') AS description,\n    round(greatest((brightcom_gross - brightcom_threshold) / 1000, 0) * brightcom_rate, 2) AS amount,\n    brightcom_rate AS rate,\n    round(greatest((brightcom_gross - brightcom_threshold) / 1000, 0), 2) AS qty\n  FROM base\n\n  UNION ALL\n\n  SELECT\n    4 AS sort_order,\n    'Rev Share:eSpot' AS product_service,\n    concat('Rev Share eSpot (', monthName(month_start), ' ', toString(toYear(month_start)), ')') AS description,\n    round(greatest((espot_gross - espot_threshold) / 1000, 0) * espot_rate, 2) AS amount,\n    espot_rate AS rate,\n    round(greatest((espot_gross - espot_threshold) / 1000, 0), 2) AS qty\n  FROM base\n\n  UNION ALL\n\n  SELECT\n    5 AS sort_order,\n    'Monthly Total' AS product_service,\n    concat('Total Monthly Revenue (', monthName(month_start), ' ', toString(toYear(month_start)), ')') AS description,\n    round(\n      brightcom_baseline\n      + espot_baseline\n      + round(greatest((brightcom_gross - brightcom_threshold) / 1000, 0) * brightcom_rate, 2)\n      + round(greatest((espot_gross - espot_threshold) / 1000, 0) * espot_rate, 2),\n      2\n    ) AS amount,\n    NULL AS rate,\n    NULL AS qty\n  FROM base\n)\nORDER BY sort_order;",
+                    "refId": "A"
+                }
+            ],
+            "title": "SL Rev",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "max": 100,
+                    "min": 0,
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "currency:financial:$"
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "A Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "B Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "C Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "D Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "A Product/service"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 298
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Description"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 513
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Qty"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Rate"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            },
+                            {
+                                "id": "unit",
+                                "value": "currency:financial:$"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Product/service"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 295
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Amount"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currency:financial:$"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 7,
+                "w": 18,
+                "x": 0,
+                "y": 23
+            },
+            "id": 19,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\n  toStartOfMonth(today()) - INTERVAL 1 MONTH AS month_start,\n  toStartOfMonth(today()) AS month_end,\n  16400.00 AS static_exclusion,\n  204000.00 AS brightcom_threshold,\n  5394.00 AS espot_threshold,\n  22.70 AS brightcom_rate,\n  24.50 AS espot_rate,\n  4669.83 AS brightcom_baseline,\n  431.71 AS espot_baseline,\n  base AS\n  (\n    SELECT\n      sumIf(net_revenue, publisher_id IN (2800, 2948)) AS brightcom_gross,\n      sumIf(net_revenue, publisher_id = 2947) AS espot_gross\n    FROM analytics.publisher_daily\n    WHERE date >= month_start\n      AND date < month_end\n  )\nSELECT\n  product_service AS \"Product/service\",\n  description AS \"Description\",\n  amount AS \"Amount\",\n  rate AS \"Rate\",\n  qty AS \"Qty\"\nFROM\n(\n  SELECT\n    1 AS sort_order,\n    'Subscription:Baseline Monthly iEmerge' AS product_service,\n    'Baseline Monthly iEmerge (Previous Month)' AS description,\n    round(brightcom_baseline, 2) AS amount,\n    round(brightcom_baseline, 2) AS rate,\n    toFloat64(1) AS qty\n  FROM base\n\n  UNION ALL\n\n  SELECT\n    2 AS sort_order,\n    'Subscription:Baseline Monthly eSpot' AS product_service,\n    'Baseline Monthly eSpot (Previous Month)' AS description,\n    round(espot_baseline, 2) AS amount,\n    round(espot_baseline, 2) AS rate,\n    toFloat64(1) AS qty\n  FROM base\n\n  UNION ALL\n\n  SELECT\n    3 AS sort_order,\n    'Rev Share:iEmerge' AS product_service,\n    'Rev Share iEmerge (Previous Month)' AS description,\n    round(greatest((brightcom_gross - brightcom_threshold) / 1000, 0) * brightcom_rate, 2) AS amount,\n    brightcom_rate AS rate,\n    round(greatest((brightcom_gross - brightcom_threshold) / 1000, 0), 2) AS qty\n  FROM base\n\n  UNION ALL\n\n  SELECT\n    4 AS sort_order,\n    'Rev Share:eSpot' AS product_service,\n    'Rev Share eSpot (Previous Month)' AS description,\n    round(greatest((espot_gross - espot_threshold) / 1000, 0) * espot_rate, 2) AS amount,\n    espot_rate AS rate,\n    round(greatest((espot_gross - espot_threshold) / 1000, 0), 2) AS qty\n  FROM base\n\n  UNION ALL\n\n  SELECT\n    5 AS sort_order,\n    'Monthly Total' AS product_service,\n    'Total Monthly Revenue (Previous Month)' AS description,\n    round(\n      brightcom_baseline\n      + espot_baseline\n      + round(greatest((brightcom_gross - brightcom_threshold) / 1000, 0) * brightcom_rate, 2)\n      + round(greatest((espot_gross - espot_threshold) / 1000, 0) * espot_rate, 2),\n      2\n    ) AS amount,\n    NULL AS rate,\n    NULL AS qty\n  FROM base\n)\nORDER BY sort_order;",
+                    "refId": "B"
+                }
+            ],
+            "title": "SL Rev",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "always",
+                        "showValues": true,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "percent"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 12,
+                "x": 0,
+                "y": 30
+            },
+            "id": 9,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "multi",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  date AS time,\n  round(sum(impressions) * 100 / nullIf(sum(inventory), 0), 4) AS fill_rate\nFROM analytics.publisher_daily\nWHERE $__timeFilter(date)\n  AND publisher_name IN (${publisher:singlequote})\nGROUP BY date\nORDER BY date",
+                    "refId": "A"
+                }
+            ],
+            "title": "Overall Fill Trend",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "always",
+                        "showValues": true,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "currency:financial:$"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 16,
+                "w": 12,
+                "x": 12,
+                "y": 30
+            },
+            "id": 11,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "multi",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  date AS time,\n  round(sumIf(net_revenue, publisher_id = 2947) * 1000 / nullIf(sumIf(impressions, publisher_id = 2947), 0), 4) AS espot_stations,\n  round(sumIf(net_revenue, publisher_id = 2800) * 1000 / nullIf(sumIf(impressions, publisher_id = 2800), 0), 4) AS brightcom_stations,\n  round(sumIf(net_revenue, publisher_id = 2948) * 1000 / nullIf(sumIf(impressions, publisher_id = 2948), 0), 4) AS brightcom_podcasts\nFROM analytics.publisher_daily\nWHERE $__timeFilter(date)\nGROUP BY date\nORDER BY date",
+                    "refId": "A"
+                }
+            ],
+            "title": "eCPM by Publisher",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 0,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "always",
+                        "showValues": true,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    },
+                    "unit": "currency:financial:$"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 10,
+                "w": 12,
+                "x": 0,
+                "y": 36
+            },
+            "id": 10,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  date AS time,\n  round(sumIf(net_revenue, publisher_id = 2947), 2) AS espot_stations,\n  round(sumIf(net_revenue, publisher_id = 2800), 2) AS brightcom_stations,\n  round(sumIf(net_revenue, publisher_id = 2948), 2) AS brightcom_podcasts\nFROM analytics.publisher_daily\nWHERE $__timeFilter(date)\nGROUP BY date\nORDER BY date",
+                    "refId": "A"
+                }
+            ],
+            "title": "Revenue by Publisher",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "barWidthFactor": 0.6,
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 2,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "always",
+                        "showValues": true,
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "decimals": 2,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    "unit": "percent"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 11,
+                "w": 12,
+                "x": 0,
+                "y": 46
+            },
+            "id": 12,
+            "options": {
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "multi",
+                    "sort": "none"
+                }
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  date AS time,\n  round(sumIf(impressions, publisher_id = 2947 AND publisher_name IN (${publisher:singlequote})) * 100 / nullIf(sumIf(inventory, publisher_id = 2947 AND publisher_name IN (${publisher:singlequote})), 0), 4) AS espot_stations,\n  round(sumIf(impressions, publisher_id = 2800 AND publisher_name IN (${publisher:singlequote})) * 100 / nullIf(sumIf(inventory, publisher_id = 2800 AND publisher_name IN (${publisher:singlequote})), 0), 4) AS brightcom_stations,\n  round(sumIf(impressions, publisher_id = 2948 AND publisher_name IN (${publisher:singlequote})) * 100 / nullIf(sumIf(inventory, publisher_id = 2948 AND publisher_name IN (${publisher:singlequote})), 0), 4) AS brightcom_podcasts\nFROM analytics.publisher_daily\nWHERE $__timeFilter(date)\nGROUP BY date\nORDER BY date",
+                    "refId": "A"
+                }
+            ],
+            "title": "Fill Rate by Publisher",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "impressions"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "locale"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 0
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "net_revenue"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currency:financial:$"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "ecpm"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currency:financial:$"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "fill_rate"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 12,
+                "x": 12,
+                "y": 46
+            },
+            "id": 13,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH latest AS\n(\n  SELECT\n    publisher_name,\n    max(date) AS latest_date\n  FROM analytics.publisher_daily\n  WHERE publisher_name IN (${publisher:singlequote})\n  GROUP BY publisher_name\n)\nSELECT\n  pd.publisher_name,\n  pd.date,\n  pd.impressions,\n  round(pd.net_revenue, 2) AS net_revenue,\n  round(pd.net_revenue * 1000 / nullIf(pd.impressions, 0), 4) AS ecpm,\n  round(pd.impressions * 100 / nullIf(pd.inventory, 0), 4) AS fill_rate\nFROM analytics.publisher_daily pd\nINNER JOIN latest l\n  ON pd.publisher_name = l.publisher_name\n AND pd.date = l.latest_date\nORDER BY pd.publisher_name",
+                    "refId": "A"
+                }
+            ],
+            "title": "Latest Publisher Snapshot",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "footer": {
+                            "reducers": []
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "net_revenue"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currency:financial:$"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "ecpm"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "currency:financial:$"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "fill_rate"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "revenue_dod_pct"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "ecpm_dod_pct"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "fill_rate_dod_pct"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "revenue_vs_prev_7d_pct"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "ecpm_vs_prev_7d_pct"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "fill_rate_vs_prev_7d_pct"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            },
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "date"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 187
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "publisher_name"
+                        },
+                        "properties": [
+                            {
+                                "id": "custom.width",
+                                "value": 236
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 12,
+                "x": 12,
+                "y": 51
+            },
+            "id": 14,
+            "options": {
+                "cellHeight": "sm",
+                "showHeader": true
+            },
+            "pluginVersion": "12.3.3",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {},
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "SELECT\n  date,\n  multiIf(\n    publisher_id = 2947, 'espot_stations',\n    publisher_id = 2800, 'brightcom_stations',\n    publisher_id = 2948, 'brightcom_podcasts',\n    publisher_name\n  ) AS publisher,\n  net_revenue,\n  ecpm,\n  fill_rate,\n  revenue_dod_pct,\n  ecpm_dod_pct,\n  fill_rate_dod_pct,\n  revenue_vs_prev_7d_pct,\n  ecpm_vs_prev_7d_pct,\n  fill_rate_vs_prev_7d_pct\nFROM analytics.v_grafana_publisher_anomalies\nWHERE $__timeFilter(time)\n  AND publisher_name IN (${publisher:singlequote})\nORDER BY date DESC, abs(ecpm_vs_prev_7d_pct) DESC\nLIMIT 100",
+                    "refId": "A"
+                }
+            ],
+            "title": "Publisher Anomalies",
+            "type": "table"
+        }
+    ],
+    "preload": false,
+    "refresh": "5m",
+    "schemaVersion": 42,
+    "tags": [
+        "clickhouse",
+        "publishers",
+        "revenue"
+    ],
+    "templating": {
+        "list": [
+            {
+                "current": {
+                    "text": "grafana-clickhouse-datasource",
+                    "value": "aep99bsdau1a8f"
+                },
+                "label": "Data source",
+                "name": "datasource",
+                "options": [],
+                "query": "grafana-clickhouse-datasource",
+                "refresh": 1,
+                "type": "datasource"
+            },
+            {
+                "current": {
+                    "text": "All",
+                    "value": [
+                        "$__all"
+                    ]
+                },
+                "datasource": {
+                    "type": "grafana-clickhouse-datasource",
+                    "uid": "${datasource}"
+                },
+                "definition": "SELECT publisher_name AS __text, toString(publisher_id) AS __value FROM analytics.publisher_daily GROUP BY publisher_id, publisher_name ORDER BY publisher_name",
+                "includeAll": true,
+                "label": "Publisher",
+                "multi": true,
+                "name": "publisher",
+                "options": [],
+                "query": "SELECT publisher_name AS __text, toString(publisher_id) AS __value FROM analytics.publisher_daily GROUP BY publisher_id, publisher_name ORDER BY publisher_name",
+                "refresh": 1,
+                "sort": 1,
+                "type": "query"
+            }
+        ]
+    },
+    "time": {
+        "from": "2026-04-15T05:00:00.000Z",
+        "to": "2026-05-01T04:59:59.000Z"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "Publisher Monetization Overview - Financial Commas",
+    "uid": "e6f23936-f014-4022-b94e-aef8e5c2c8ea",
+    "version": 13,
+    "weekStart": ""
+}

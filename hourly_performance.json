@@ -1,0 +1,466 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 41,
+    "links": [],
+    "panels": [
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "continuous-GrYlRd"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "fieldMinMax": false,
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "winrate_share_pct"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 20,
+                "w": 20,
+                "x": 0,
+                "y": 0
+            },
+            "id": 1,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\n  cutoff AS (\n    SELECT (toStartOfHour(now()) - INTERVAL 2 HOUR) AS cut\n  ),\n  per_hour AS (\n    SELECT\n      toStartOfHour(timestamp) AS time,\n      sum(Impressions) AS imps,\n      sum(Requests)    AS reqs\n    FROM default.`26_ss_dist_reporting`\n    WHERE timestamp >= (SELECT cut FROM cutoff) - INTERVAL 24 HOUR\n      AND timestamp <  (SELECT cut FROM cutoff)\n    GROUP BY time\n  ),\n  per_hour_win_volume AS (\n    SELECT\n      time,\n      imps,\n      reqs,\n      imps / nullIf(reqs, 0) AS winrate,\n      imps * (imps / nullIf(reqs, 0)) AS weighted_win\n    FROM per_hour\n  )\nSELECT\n  time,\n  weighted_win / sum(weighted_win) OVER () * 100 AS winrate_share_pct\nFROM per_hour_win_volume\nORDER BY time;\n",
+                    "refId": "A"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\n  cutoff AS (\n    SELECT toStartOfHour(now()) - INTERVAL 2 HOUR AS cut\n  ),\n  per_hour AS (\n    SELECT\n      toHour(timestamp) AS hour_of_day,\n      sum(Impressions) AS imps,\n      sum(Requests) AS reqs\n    FROM default.`26_ss_dist_reporting`\n    WHERE timestamp >= (SELECT cut FROM cutoff) - INTERVAL 7 DAY\n      AND timestamp <  (SELECT cut FROM cutoff)\n    GROUP BY hour_of_day\n  ),\n  win_by_hour AS (\n    -- compute weighted wins for each hour (equivalent to impressions)\n    SELECT\n      hour_of_day,\n      reqs * (imps / nullIf(reqs, 0)) AS weighted_win\n    FROM per_hour\n  )\nSELECT\n  hour_of_day,\n  -- only return the normalized share (percentage) for graphing\n  weighted_win / sum(weighted_win) OVER () * 100 AS win_share_pct\nFROM win_by_hour\nORDER BY hour_of_day;\n",
+                    "refId": "B"
+                }
+            ],
+            "title": "last 24 hours ",
+            "transparent": true,
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "A win_share_pct"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 11,
+                "w": 10,
+                "x": 0,
+                "y": 20
+            },
+            "id": 2,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\n  cutoff AS (\n    SELECT toStartOfHour(now()) - INTERVAL 2 HOUR AS cut\n  ),\n  per_hour AS (\n    SELECT\n      toHour(timestamp) AS hour_of_day,\n      sum(Impressions) AS imps,\n      sum(Requests) AS reqs\n    FROM default.`26_ss_dist_reporting`\n    WHERE timestamp >= (SELECT cut FROM cutoff) - INTERVAL 30 DAY\n      AND timestamp <  (SELECT cut FROM cutoff)\n    GROUP BY hour_of_day\n  ),\n  win_by_hour AS (\n    SELECT\n      hour_of_day,\n      reqs * (imps / nullIf(reqs, 0)) AS weighted_win\n    FROM per_hour\n  )\nSELECT\n  -- Convert hour_of_day into a string label for the bar chart\n  concat(toString(hour_of_day), ':00') AS hour_label,\n  -- Normalised share of weighted wins for each hour\n  weighted_win / sum(weighted_win) OVER () * 100 AS win_share_pct\nFROM win_by_hour\nORDER BY hour_of_day;\n",
+                    "refId": "A"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\n  cutoff AS (\n    SELECT toStartOfHour(now()) - INTERVAL 2 HOUR AS cut\n  ),\n  per_hour AS (\n    SELECT\n      toHour(timestamp) AS hour_of_day,\n      sum(Impressions) AS imps,\n      sum(Requests) AS reqs\n    FROM default.`26_ss_dist_reporting`\n    WHERE timestamp >= (SELECT cut FROM cutoff) - INTERVAL 7 DAY\n      AND timestamp <  (SELECT cut FROM cutoff)\n    GROUP BY hour_of_day\n  ),\n  win_by_hour AS (\n    SELECT\n      hour_of_day,\n      reqs * (imps / nullIf(reqs, 0)) AS weighted_win\n    FROM per_hour\n  )\nSELECT\n  -- Convert hour_of_day into a string label for the bar chart\n  concat(toString(hour_of_day), ':00') AS hour_label,\n  -- Normalised share of weighted wins for each hour\n  weighted_win / sum(weighted_win) OVER () * 100 AS win_share_pct\nFROM win_by_hour\nORDER BY hour_of_day;\n",
+                    "refId": "B"
+                }
+            ],
+            "title": "last 7 day ",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "aep99bsdau1a8f"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "custom": {
+                        "axisBorderShow": false,
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "fillOpacity": 80,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "lineWidth": 1,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": 0
+                            },
+                            {
+                                "color": "red",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "A win_share_pct"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 11,
+                "w": 10,
+                "x": 10,
+                "y": 20
+            },
+            "id": 3,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "hideZeros": false,
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xTickLabelRotation": 45,
+                "xTickLabelSpacing": 0
+            },
+            "pluginVersion": "12.3.1",
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\n  cutoff AS (\n    SELECT toStartOfHour(now()) - INTERVAL 2 HOUR AS cut\n  ),\n  per_hour AS (\n    SELECT\n      toHour(timestamp) AS hour_of_day,\n      sum(Impressions) AS imps,\n      sum(Requests) AS reqs\n    FROM default.`26_ss_dist_reporting`\n    WHERE timestamp >= (SELECT cut FROM cutoff) - INTERVAL 23 DAY\n      AND timestamp <  (SELECT cut FROM cutoff)\n    GROUP BY hour_of_day\n  ),\n  win_by_hour AS (\n    SELECT\n      hour_of_day,\n      reqs * (imps / nullIf(reqs, 0)) AS weighted_win\n    FROM per_hour\n  )\nSELECT\n  -- Convert hour_of_day into a string label for the bar chart\n  concat(toString(hour_of_day), ':00') AS hour_label,\n  -- Normalised share of weighted wins for each hour\n  weighted_win / sum(weighted_win) OVER () * 100 AS win_share_pct\nFROM win_by_hour\nORDER BY hour_of_day;\n",
+                    "refId": "A"
+                },
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "aep99bsdau1a8f"
+                    },
+                    "editorType": "sql",
+                    "format": 1,
+                    "hide": false,
+                    "meta": {
+                        "builderOptions": {
+                            "columns": [],
+                            "database": "",
+                            "limit": 1000,
+                            "mode": "list",
+                            "queryType": "table",
+                            "table": ""
+                        }
+                    },
+                    "pluginVersion": "4.10.0",
+                    "queryType": "table",
+                    "rawSql": "WITH\n  cutoff AS (\n    SELECT toStartOfHour(now()) - INTERVAL 2 HOUR AS cut\n  ),\n  per_hour AS (\n    SELECT\n      toHour(timestamp) AS hour_of_day,\n      sum(Impressions) AS imps,\n      sum(Requests) AS reqs\n    FROM default.`26_ss_dist_reporting`\n    WHERE timestamp >= (SELECT cut FROM cutoff) - INTERVAL 7 DAY\n      AND timestamp <  (SELECT cut FROM cutoff)\n    GROUP BY hour_of_day\n  ),\n  win_by_hour AS (\n    SELECT\n      hour_of_day,\n      reqs * (imps / nullIf(reqs, 0)) AS weighted_win\n    FROM per_hour\n  )\nSELECT\n  -- Convert hour_of_day into a string label for the bar chart\n  concat(toString(hour_of_day), ':00') AS hour_label,\n  -- Normalised share of weighted wins for each hour\n  weighted_win / sum(weighted_win) OVER () * 100 AS win_share_pct\nFROM win_by_hour\nORDER BY hour_of_day;\n",
+                    "refId": "B"
+                }
+            ],
+            "title": "YTD",
+            "type": "barchart"
+        }
+    ],
+    "preload": false,
+    "schemaVersion": 42,
+    "tags": [],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-27h",
+        "to": "now-3h"
+    },
+    "timepicker": {},
+    "timezone": "utc",
+    "title": "Hourly Performance",
+    "uid": "adszcbh",
+    "version": 14,
+    "weekStart": ""
+}

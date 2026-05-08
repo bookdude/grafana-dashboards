@@ -1,0 +1,239 @@
+{
+  "title": "VCASA System Status",
+  "uid": "vcasa-system-status",
+  "description": "Up/Down status for all VCASA systems. Universe = seen YTD in 26_ss_dist_reporting. Online = seen in the most recent hour bucket.",
+  "tags": ["vcasa", "updown", "monitoring", "clickhouse"],
+  "timezone": "browser",
+  "refresh": "5m",
+  "time": { "from": "now-6h", "to": "now" },
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Online",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "orientation": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red",   "value": null },
+              { "color": "green", "value": 1 }
+            ]
+          },
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "noValue": "0"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "rawSql": "SELECT countDistinct(v.vcasa_name) AS online\nFROM default.`26_ss_dist_reporting` r\nJOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\nWHERE r.timestamp >= toStartOfHour((SELECT max(timestamp) FROM default.`26_ss_dist_reporting`))\n  AND r.Dist NOT LIKE 'generated%'",
+          "format": 1,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Offline",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "orientation": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red",   "value": 1 }
+            ]
+          },
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "noValue": "0"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "rawSql": "WITH\n  latest_hour AS (\n    SELECT toStartOfHour(max(timestamp)) AS t FROM default.`26_ss_dist_reporting`\n  ),\n  ytd_names AS (\n    SELECT DISTINCT v.vcasa_name\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= toStartOfYear(today())\n      AND r.Dist NOT LIKE 'generated%'\n  ),\n  online_names AS (\n    SELECT DISTINCT v.vcasa_name\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= (SELECT t FROM latest_hour)\n      AND r.Dist NOT LIKE 'generated%'\n  )\nSELECT countIf(o.vcasa_name = '') AS offline\nFROM ytd_names y\nLEFT JOIN online_names o ON y.vcasa_name = o.vcasa_name",
+          "format": 1,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Total YTD Units",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "orientation": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "blue", "value": null }]
+          },
+          "color": { "mode": "thresholds" },
+          "mappings": [],
+          "noValue": "0"
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "rawSql": "SELECT countDistinct(v.vcasa_name) AS total_ytd\nFROM default.`26_ss_dist_reporting` r\nJOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\nWHERE r.timestamp >= toStartOfYear(today())\n  AND r.Dist NOT LIKE 'generated%'",
+          "format": 1,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Latest Data Hour",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto",
+        "orientation": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeAsLocal",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "purple", "value": null }]
+          },
+          "color": { "mode": "thresholds" },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "rawSql": "SELECT toUnixTimestamp(toStartOfHour(max(timestamp))) * 1000 AS latest_hour\nFROM default.`26_ss_dist_reporting`",
+          "format": 1,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "table",
+      "title": "VCASA Status — All YTD Systems",
+      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 28 },
+      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "options": {
+        "sortBy": [{ "displayName": "Status", "desc": false }],
+        "cellHeight": "sm",
+        "footer": { "show": false }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "inspect": false
+          }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "Status" },
+            "properties": [
+              { "id": "custom.displayMode", "value": "color-background" },
+              { "id": "custom.width", "value": 100 },
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "type": "value",
+                    "options": {
+                      "0": { "text": "OFFLINE", "color": "red",   "index": 0 },
+                      "1": { "text": "ONLINE",  "color": "green", "index": 1 }
+                    }
+                  }
+                ]
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    { "color": "red",   "value": null },
+                    { "color": "green", "value": 1 }
+                  ]
+                }
+              },
+              { "id": "color", "value": { "mode": "thresholds" } }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Last Seen" },
+            "properties": [
+              { "id": "unit", "value": "dateTimeAsLocal" },
+              { "id": "custom.width", "value": 160 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "VCASA" },
+            "properties": [{ "id": "custom.width", "value": 120 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "IP" },
+            "properties": [{ "id": "custom.width", "value": 130 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "State" },
+            "properties": [{ "id": "custom.width", "value": 70 }]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Provider" },
+            "properties": [{ "id": "custom.width", "value": 90 }]
+          }
+        ]
+      },
+      "targets": [
+        {
+          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "rawSql": "WITH\n  latest_hour AS (\n    SELECT toStartOfHour(max(timestamp)) AS t FROM default.`26_ss_dist_reporting`\n  ),\n  ytd AS (\n    SELECT\n      v.vcasa_name,\n      any(v.ip)        AS ip,\n      any(v.city)      AS city,\n      any(v.state)     AS state,\n      any(v.provider)  AS provider,\n      max(r.timestamp) AS last_seen\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= toStartOfYear(today())\n      AND r.Dist NOT LIKE 'generated%'\n    GROUP BY v.vcasa_name\n  ),\n  online AS (\n    SELECT DISTINCT v.vcasa_name\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= (SELECT t FROM latest_hour)\n      AND r.Dist NOT LIKE 'generated%'\n  )\nSELECT\n  y.vcasa_name                                    AS \"VCASA\",\n  if(o.vcasa_name != '', 1, 0)                    AS \"Status\",\n  y.ip                                            AS \"IP\",\n  y.city                                          AS \"City\",\n  y.state                                         AS \"State\",\n  y.provider                                      AS \"Provider\",\n  toUnixTimestamp(y.last_seen) * 1000             AS \"Last Seen\"\nFROM ytd y\nLEFT JOIN online o ON y.vcasa_name = o.vcasa_name\nORDER BY \"Status\" ASC, \"Last Seen\" ASC",
+          "format": 1,
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1166 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": {
+                    "type": "grafana",
+                    "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 1,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+        {
+            "gridPos": {
+                "h": 3,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 1,
+            "options": {
+                "content": "This translates the spreadsheet idea into live Grafana time series. Productivity is driven by the selected metric variable, defaulting to **Impressions**. Strong, Elite, and Outlier are dynamic P90, P95, and P99 tiers inside the selected time range and Dist filter. `% Base` means percent of active Dists. `% Impressions` means share of captured impressions.",
+                "mode": "markdown"
+            },
+            "title": "How to read this dashboard",
+            "transparent": false,
+            "type": "text"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "description": "Active base, outlier count, outlier percent of base, impression capture, and live percentile thresholds.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "orange",
+                                "value": 80
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*%.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byRegexp",
+                            "options": ".*Threshold.*"
+                        },
+                        "properties": [
+                            {
+                                "id": "decimals",
+                                "value": 2
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 24,
+                "x": 0,
+                "y": 3
+            },
+            "id": 2,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "none",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": "table",
+                    "queryType": "sql",
+                    "rawSql": "WITH\nbase AS\n(\n    SELECT\n        Dist,\n        sum(Requests) AS requests,\n        sum(Impressions) AS impressions,\n        toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0) AS win_rate,\n        max(hour_bucket) AS last_seen,\n        count() AS hours_seen,\n        multiIf(\n            '${outlier_metric}' = 'WinRate', toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0),\n            '${outlier_metric}' = 'Requests', toFloat64(sum(Requests)),\n            toFloat64(sum(Impressions))\n        ) AS metric_value\n    FROM default.dist_perf_hourly\n    WHERE $__timeFilter(hour_bucket)\n      AND match(Dist, '${dist:regex}')\n    GROUP BY Dist\n    HAVING impressions >= toUInt64(${min_impressions})\n),\nthresholds AS\n(\n    SELECT\n        quantileExact(0.90)(metric_value) AS p90,\n        quantileExact(0.95)(metric_value) AS p95,\n        quantileExact(0.99)(metric_value) AS p99\n    FROM base\n)\n\nSELECT\n    count() AS \"Active Dists\",\n    countIf(metric_value >= p99) AS \"Outlier Dists\",\n    round(100.0 * countIf(metric_value >= p99) / nullIf(count(), 0), 2) AS \"Outlier % of Base\",\n    round(100.0 * sumIf(impressions, metric_value >= p99) / nullIf(sum(impressions), 0), 2) AS \"Outlier % of Impressions\",\n    round(any(p90), 2) AS \"P90 Strong Threshold\",\n    round(any(p95), 2) AS \"P95 Elite Threshold\",\n    round(any(p99), 2) AS \"P99 Outlier Threshold\"\nFROM base\nCROSS JOIN thresholds",
+                    "refId": "A"
+                }
+            ],
+            "title": "Outlier Snapshot",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "description": "Hourly Requests and Impressions for the selected Dist population.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "never",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 8
+            },
+            "id": 3,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "lastNotNull",
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": "time_series",
+                    "queryType": "sql",
+                    "rawSql": "SELECT\n    hour_bucket AS time,\n    sum(Requests) AS \"Requests\",\n    sum(Impressions) AS \"Impressions\"\nFROM default.dist_perf_hourly\nWHERE $__timeFilter(hour_bucket)\n  AND match(Dist, '${dist:regex}')\nGROUP BY time\nORDER BY time",
+                    "refId": "A"
+                }
+            ],
+            "title": "Traffic Productivity Over Time",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "description": "Hourly Impressions / Requests across the selected Dist population.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "never",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "percent"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 8
+            },
+            "id": 4,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "lastNotNull",
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": "time_series",
+                    "queryType": "sql",
+                    "rawSql": "SELECT\n    hour_bucket AS time,\n    round(100.0 * sum(Impressions) / nullIf(sum(Requests), 0), 3) AS \"Win Rate %\"\nFROM default.dist_perf_hourly\nWHERE $__timeFilter(hour_bucket)\n  AND match(Dist, '${dist:regex}')\nGROUP BY time\nORDER BY time",
+                    "refId": "A"
+                }
+            ],
+            "title": "Win Rate Over Time",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "description": "Tracks whether the outlier base is stable, expanding, or collapsing over time.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "never",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "percent"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 16
+            },
+            "id": 5,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "lastNotNull",
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": "time_series",
+                    "queryType": "sql",
+                    "rawSql": "WITH\nhourly AS\n(\n    SELECT\n        hour_bucket,\n        Dist,\n        sum(Requests) AS requests,\n        sum(Impressions) AS impressions,\n        toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0) AS win_rate,\n        multiIf(\n            '${outlier_metric}' = 'WinRate', toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0),\n            '${outlier_metric}' = 'Requests', toFloat64(sum(Requests)),\n            toFloat64(sum(Impressions))\n        ) AS metric_value\n    FROM default.dist_perf_hourly\n    WHERE $__timeFilter(hour_bucket)\n      AND match(Dist, '${dist:regex}')\n    GROUP BY hour_bucket, Dist\n    HAVING impressions >= toUInt64(${min_impressions})\n),\nthresholds AS\n(\n    SELECT\n        hour_bucket,\n        quantileExact(0.90)(metric_value) AS p90,\n        quantileExact(0.95)(metric_value) AS p95,\n        quantileExact(0.99)(metric_value) AS p99\n    FROM hourly\n    GROUP BY hour_bucket\n),\nscored AS\n(\n    SELECT h.*, t.p90, t.p95, t.p99\n    FROM hourly AS h\n    INNER JOIN thresholds AS t USING (hour_bucket)\n)\nSELECT\n    hour_bucket AS time,\n    round(100.0 * countIf(metric_value >= p99) / nullIf(count(), 0), 2) AS \"Outlier % of Dists\",\n    round(100.0 * sumIf(impressions, metric_value >= p99) / nullIf(sum(impressions), 0), 2) AS \"Outlier % of Impressions\",\n    countIf(metric_value >= p99) AS \"Outlier Dists\"\nFROM scored\nGROUP BY time\nORDER BY time",
+                    "refId": "A"
+                }
+            ],
+            "title": "Outlier Percentage Over Time",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "description": "Spreadsheet-style tier view: how much of the base and impression capture is concentrated in Strong, Elite, and Outlier Dists.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "scaleDistribution": {
+                            "type": "linear"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "% Base"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "% Impressions"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Outlier %"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 16
+            },
+            "id": 6,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xField": "Tier",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": "table",
+                    "queryType": "sql",
+                    "rawSql": "WITH\nbase AS\n(\n    SELECT\n        Dist,\n        sum(Requests) AS requests,\n        sum(Impressions) AS impressions,\n        toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0) AS win_rate,\n        max(hour_bucket) AS last_seen,\n        count() AS hours_seen,\n        multiIf(\n            '${outlier_metric}' = 'WinRate', toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0),\n            '${outlier_metric}' = 'Requests', toFloat64(sum(Requests)),\n            toFloat64(sum(Impressions))\n        ) AS metric_value\n    FROM default.dist_perf_hourly\n    WHERE $__timeFilter(hour_bucket)\n      AND match(Dist, '${dist:regex}')\n    GROUP BY Dist\n    HAVING impressions >= toUInt64(${min_impressions})\n),\nthresholds AS\n(\n    SELECT\n        quantileExact(0.90)(metric_value) AS p90,\n        quantileExact(0.95)(metric_value) AS p95,\n        quantileExact(0.99)(metric_value) AS p99\n    FROM base\n)\n,\nscored AS\n(\n    SELECT\n        b.*,\n        t.p90,\n        t.p95,\n        t.p99,\n        multiIf(\n            b.metric_value >= t.p99, 'Outlier',\n            b.metric_value >= t.p95, 'Elite',\n            b.metric_value >= t.p90, 'Strong',\n            'Base'\n        ) AS tier,\n        multiIf(\n            b.metric_value >= t.p99, 1,\n            b.metric_value >= t.p95, 2,\n            b.metric_value >= t.p90, 3,\n            4\n        ) AS tier_sort\n    FROM base AS b\n    CROSS JOIN thresholds AS t\n)\n,\ngrouped AS\n(\n    SELECT\n        tier,\n        tier_sort,\n        count() AS dists,\n        sum(requests) AS requests,\n        sum(impressions) AS impressions,\n        avg(win_rate) AS avg_win_rate,\n        avg(metric_value) AS avg_metric\n    FROM scored\n    GROUP BY tier, tier_sort\n)\nSELECT\n    tier AS \"Tier\",\n    dists AS \"# Dists\",\n    round(100.0 * dists / nullIf(sum(dists) OVER (), 0), 2) AS \"% Base\",\n    impressions AS \"Impressions\",\n    round(100.0 * impressions / nullIf(sum(impressions) OVER (), 0), 2) AS \"% Impressions\",\n    requests AS \"Requests\",\n    round(100.0 * impressions / nullIf(requests, 0), 3) AS \"Win Rate %\",\n    round(avg_metric, 2) AS \"Avg Metric\"\nFROM grouped\nORDER BY tier_sort",
+                    "refId": "A"
+                }
+            ],
+            "title": "Tier Mix and Capture Share",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "description": "Top Dists from the selected period, plotted hourly. Uses Impressions as the time-series value even when the outlier metric is WinRate or Requests.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "barAlignment": 0,
+                        "drawStyle": "line",
+                        "fillOpacity": 10,
+                        "gradientMode": "none",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "insertNulls": false,
+                        "lineInterpolation": "linear",
+                        "lineWidth": 1,
+                        "pointSize": 5,
+                        "scaleDistribution": {
+                            "type": "linear"
+                        },
+                        "showPoints": "never",
+                        "spanNulls": false,
+                        "stacking": {
+                            "group": "A",
+                            "mode": "none"
+                        },
+                        "thresholdsStyle": {
+                            "mode": "off"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    },
+                    "unit": "short"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 9,
+                "w": 24,
+                "x": 0,
+                "y": 24
+            },
+            "id": 7,
+            "options": {
+                "legend": {
+                    "calcs": [
+                        "lastNotNull",
+                        "max"
+                    ],
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "multi",
+                    "sort": "desc"
+                }
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": "time_series",
+                    "queryType": "sql",
+                    "rawSql": "WITH\nbase AS\n(\n    SELECT\n        Dist,\n        sum(Requests) AS requests,\n        sum(Impressions) AS impressions,\n        toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0) AS win_rate,\n        max(hour_bucket) AS last_seen,\n        count() AS hours_seen,\n        multiIf(\n            '${outlier_metric}' = 'WinRate', toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0),\n            '${outlier_metric}' = 'Requests', toFloat64(sum(Requests)),\n            toFloat64(sum(Impressions))\n        ) AS metric_value\n    FROM default.dist_perf_hourly\n    WHERE $__timeFilter(hour_bucket)\n      AND match(Dist, '${dist:regex}')\n    GROUP BY Dist\n    HAVING impressions >= toUInt64(${min_impressions})\n),\nthresholds AS\n(\n    SELECT\n        quantileExact(0.90)(metric_value) AS p90,\n        quantileExact(0.95)(metric_value) AS p95,\n        quantileExact(0.99)(metric_value) AS p99\n    FROM base\n)\n,\nscored AS\n(\n    SELECT\n        b.*,\n        t.p90,\n        t.p95,\n        t.p99,\n        multiIf(\n            b.metric_value >= t.p99, 'Outlier',\n            b.metric_value >= t.p95, 'Elite',\n            b.metric_value >= t.p90, 'Strong',\n            'Base'\n        ) AS tier,\n        multiIf(\n            b.metric_value >= t.p99, 1,\n            b.metric_value >= t.p95, 2,\n            b.metric_value >= t.p90, 3,\n            4\n        ) AS tier_sort\n    FROM base AS b\n    CROSS JOIN thresholds AS t\n)\n,\ntop_dists AS\n(\n    SELECT Dist\n    FROM scored\n    WHERE tier IN ('Outlier', 'Elite', 'Strong')\n    ORDER BY metric_value DESC\n    LIMIT toUInt64(${show_top})\n)\nSELECT\n    hour_bucket AS time,\n    Dist AS metric,\n    sum(Impressions) AS value\nFROM default.dist_perf_hourly\nWHERE $__timeFilter(hour_bucket)\n  AND Dist IN (SELECT Dist FROM top_dists)\nGROUP BY time, metric\nORDER BY time, metric",
+                    "refId": "A"
+                }
+            ],
+            "title": "Top Productive Dists Over Time",
+            "type": "timeseries"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "description": "Detail table for the high-productivity tier. Z Score shows how far the Dist is from the selected population average.",
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Win Rate %"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "% Total Impressions"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 10,
+                "w": 24,
+                "x": 0,
+                "y": 33
+            },
+            "id": 8,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": "table",
+                    "queryType": "sql",
+                    "rawSql": "WITH\nbase AS\n(\n    SELECT\n        Dist,\n        sum(Requests) AS requests,\n        sum(Impressions) AS impressions,\n        toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0) AS win_rate,\n        max(hour_bucket) AS last_seen,\n        count() AS hours_seen,\n        multiIf(\n            '${outlier_metric}' = 'WinRate', toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0),\n            '${outlier_metric}' = 'Requests', toFloat64(sum(Requests)),\n            toFloat64(sum(Impressions))\n        ) AS metric_value\n    FROM default.dist_perf_hourly\n    WHERE $__timeFilter(hour_bucket)\n      AND match(Dist, '${dist:regex}')\n    GROUP BY Dist\n    HAVING impressions >= toUInt64(${min_impressions})\n),\nthresholds AS\n(\n    SELECT\n        quantileExact(0.90)(metric_value) AS p90,\n        quantileExact(0.95)(metric_value) AS p95,\n        quantileExact(0.99)(metric_value) AS p99\n    FROM base\n)\n,\nscored AS\n(\n    SELECT\n        b.*,\n        t.p90,\n        t.p95,\n        t.p99,\n        multiIf(\n            b.metric_value >= t.p99, 'Outlier',\n            b.metric_value >= t.p95, 'Elite',\n            b.metric_value >= t.p90, 'Strong',\n            'Base'\n        ) AS tier,\n        multiIf(\n            b.metric_value >= t.p99, 1,\n            b.metric_value >= t.p95, 2,\n            b.metric_value >= t.p90, 3,\n            4\n        ) AS tier_sort\n    FROM base AS b\n    CROSS JOIN thresholds AS t\n)\n,\nstats AS\n(\n    SELECT\n        sum(impressions) AS total_impressions,\n        avg(metric_value) AS avg_metric,\n        stddevPop(metric_value) AS sd_metric\n    FROM scored\n)\nSELECT\n    Dist,\n    tier AS \"Tier\",\n    requests AS \"Requests\",\n    impressions AS \"Impressions\",\n    round(100.0 * win_rate, 3) AS \"Win Rate %\",\n    round(100.0 * impressions / nullIf(total_impressions, 0), 2) AS \"% Total Impressions\",\n    round(metric_value, 2) AS \"Metric Value\",\n    round((metric_value - avg_metric) / nullIf(sd_metric, 0), 2) AS \"Z Score\",\n    hours_seen AS \"Hours Seen\",\n    last_seen AS \"Last Seen\"\nFROM scored\nCROSS JOIN stats\nWHERE tier IN ('Outlier', 'Elite', 'Strong')\nORDER BY metric_value DESC\nLIMIT 500",
+                    "refId": "A"
+                }
+            ],
+            "title": "Top Outlier / Elite / Strong Dists",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "description": "Bottom 5% by Win Rate after the minimum-impression gate. This catches Dists that consume opportunity but convert poorly.",
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Win Rate %"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "P05 Win Rate %"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 9,
+                "w": 12,
+                "x": 0,
+                "y": 43
+            },
+            "id": 9,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": "table",
+                    "queryType": "sql",
+                    "rawSql": "WITH\nbase AS\n(\n    SELECT\n        Dist,\n        sum(Requests) AS requests,\n        sum(Impressions) AS impressions,\n        toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0) AS win_rate,\n        max(hour_bucket) AS last_seen,\n        count() AS hours_seen\n    FROM default.dist_perf_hourly\n    WHERE $__timeFilter(hour_bucket)\n      AND match(Dist, '${dist:regex}')\n    GROUP BY Dist\n    HAVING impressions >= toUInt64(${min_impressions})\n),\nthresholds AS\n(\n    SELECT quantileExact(0.05)(win_rate) AS p05_win_rate\n    FROM base\n)\nSELECT\n    Dist,\n    requests AS \"Requests\",\n    impressions AS \"Impressions\",\n    round(100.0 * win_rate, 3) AS \"Win Rate %\",\n    round(100.0 * any(p05_win_rate), 3) AS \"P05 Win Rate %\",\n    hours_seen AS \"Hours Seen\",\n    last_seen AS \"Last Seen\"\nFROM base\nCROSS JOIN thresholds\nWHERE win_rate <= p05_win_rate\nGROUP BY Dist, requests, impressions, win_rate, hours_seen, last_seen\nORDER BY win_rate ASC, impressions DESC\nLIMIT 100",
+                    "refId": "A"
+                }
+            ],
+            "title": "Low Productivity Outliers",
+            "type": "table"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "description": "Shows whether outliers cluster during specific hours of day.",
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "custom": {
+                        "axisCenteredZero": false,
+                        "axisColorMode": "text",
+                        "axisLabel": "",
+                        "axisPlacement": "auto",
+                        "hideFrom": {
+                            "legend": false,
+                            "tooltip": false,
+                            "viz": false
+                        },
+                        "scaleDistribution": {
+                            "type": "linear"
+                        }
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "% Base"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "% Impressions"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "Outlier %"
+                        },
+                        "properties": [
+                            {
+                                "id": "unit",
+                                "value": "percent"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "gridPos": {
+                "h": 9,
+                "w": 12,
+                "x": 12,
+                "y": 43
+            },
+            "id": 10,
+            "options": {
+                "barRadius": 0,
+                "barWidth": 0.97,
+                "fullHighlight": false,
+                "groupWidth": 0.7,
+                "legend": {
+                    "calcs": [],
+                    "displayMode": "list",
+                    "placement": "bottom",
+                    "showLegend": true
+                },
+                "orientation": "auto",
+                "showValue": "auto",
+                "stacking": "none",
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                },
+                "xField": "Hour",
+                "xTickLabelRotation": 0,
+                "xTickLabelSpacing": 0
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": "table",
+                    "queryType": "sql",
+                    "rawSql": "WITH\nhourly AS\n(\n    SELECT\n        hour_bucket,\n        toHour(hour_bucket) AS hod,\n        Dist,\n        sum(Requests) AS requests,\n        sum(Impressions) AS impressions,\n        toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0) AS win_rate,\n        multiIf(\n            '${outlier_metric}' = 'WinRate', toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0),\n            '${outlier_metric}' = 'Requests', toFloat64(sum(Requests)),\n            toFloat64(sum(Impressions))\n        ) AS metric_value\n    FROM default.dist_perf_hourly\n    WHERE $__timeFilter(hour_bucket)\n      AND match(Dist, '${dist:regex}')\n    GROUP BY hour_bucket, hod, Dist\n    HAVING impressions >= toUInt64(${min_impressions})\n),\nthresholds AS\n(\n    SELECT\n        hour_bucket,\n        quantileExact(0.99)(metric_value) AS p99\n    FROM hourly\n    GROUP BY hour_bucket\n),\nscored AS\n(\n    SELECT h.*, t.p99\n    FROM hourly AS h\n    INNER JOIN thresholds AS t USING (hour_bucket)\n)\nSELECT\n    hod AS \"Hour\",\n    countIf(metric_value >= p99) AS \"Outlier Observations\",\n    count() AS \"Total Observations\",\n    round(100.0 * countIf(metric_value >= p99) / nullIf(count(), 0), 2) AS \"Outlier %\"\nFROM scored\nGROUP BY hod\nORDER BY hod",
+                    "refId": "A"
+                }
+            ],
+            "title": "Outlier Concentration by Hour",
+            "type": "barchart"
+        },
+        {
+            "datasource": {
+                "type": "grafana-clickhouse-datasource",
+                "uid": "${datasource}"
+            },
+            "description": "Live P90/P95/P99 cutoffs for the selected metric, time range, Dist filter, and minimum-impression gate.",
+            "fieldConfig": {
+                "defaults": {
+                    "custom": {
+                        "align": "auto",
+                        "cellOptions": {
+                            "type": "auto"
+                        },
+                        "inspect": false
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 5,
+                "w": 24,
+                "x": 0,
+                "y": 52
+            },
+            "id": 11,
+            "options": {
+                "cellHeight": "sm",
+                "footer": {
+                    "fields": "",
+                    "reducer": [
+                        "sum"
+                    ],
+                    "show": false
+                },
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "datasource": {
+                        "type": "grafana-clickhouse-datasource",
+                        "uid": "${datasource}"
+                    },
+                    "editorType": "sql",
+                    "format": "table",
+                    "queryType": "sql",
+                    "rawSql": "WITH\nbase AS\n(\n    SELECT\n        Dist,\n        sum(Requests) AS requests,\n        sum(Impressions) AS impressions,\n        toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0) AS win_rate,\n        max(hour_bucket) AS last_seen,\n        count() AS hours_seen,\n        multiIf(\n            '${outlier_metric}' = 'WinRate', toFloat64(sum(Impressions)) / nullIf(sum(Requests), 0),\n            '${outlier_metric}' = 'Requests', toFloat64(sum(Requests)),\n            toFloat64(sum(Impressions))\n        ) AS metric_value\n    FROM default.dist_perf_hourly\n    WHERE $__timeFilter(hour_bucket)\n      AND match(Dist, '${dist:regex}')\n    GROUP BY Dist\n    HAVING impressions >= toUInt64(${min_impressions})\n),\nthresholds AS\n(\n    SELECT\n        quantileExact(0.90)(metric_value) AS p90,\n        quantileExact(0.95)(metric_value) AS p95,\n        quantileExact(0.99)(metric_value) AS p99\n    FROM base\n)\n\nSELECT\n    '${outlier_metric}' AS \"Metric\",\n    round(any(p90), 2) AS \"Strong / P90\",\n    round(any(p95), 2) AS \"Elite / P95\",\n    round(any(p99), 2) AS \"Outlier / P99\"\nFROM base\nCROSS JOIN thresholds",
+                    "refId": "A"
+                }
+            ],
+            "title": "Current Dynamic Thresholds",
+            "type": "table"
+        }
+    ],
+    "refresh": "5m",
+    "schemaVersion": 39,
+    "tags": [
+        "clickhouse",
+        "dist",
+        "productivity",
+        "outliers"
+    ],
+    "templating": {
+        "list": [
+            {
+                "current": {
+                    "selected": false,
+                    "text": "ClickHouse",
+                    "value": "aep99bsdau1a8f"
+                },
+                "hide": 0,
+                "label": "ClickHouse Datasource",
+                "name": "datasource",
+                "options": [],
+                "query": "grafana-clickhouse-datasource",
+                "refresh": 1,
+                "type": "datasource"
+            },
+            {
+                "allValue": ".*",
+                "current": {
+                    "selected": true,
+                    "text": "All",
+                    "value": "$__all"
+                },
+                "datasource": {
+                    "type": "grafana-clickhouse-datasource",
+                    "uid": "${datasource}"
+                },
+                "definition": "SELECT DISTINCT Dist FROM default.dist_perf_hourly WHERE $__timeFilter(hour_bucket) ORDER BY Dist",
+                "includeAll": true,
+                "label": "Dist",
+                "multi": true,
+                "name": "dist",
+                "options": [],
+                "query": "SELECT DISTINCT Dist FROM default.dist_perf_hourly WHERE $__timeFilter(hour_bucket) ORDER BY Dist",
+                "refresh": 2,
+                "sort": 1,
+                "type": "query"
+            },
+            {
+                "current": {
+                    "selected": true,
+                    "text": "Impressions",
+                    "value": "Impressions"
+                },
+                "includeAll": false,
+                "label": "Outlier Metric",
+                "multi": false,
+                "name": "outlier_metric",
+                "options": [
+                    {
+                        "selected": true,
+                        "text": "Impressions",
+                        "value": "Impressions"
+                    },
+                    {
+                        "selected": false,
+                        "text": "Requests",
+                        "value": "Requests"
+                    },
+                    {
+                        "selected": false,
+                        "text": "WinRate",
+                        "value": "WinRate"
+                    }
+                ],
+                "query": "Impressions,Requests,WinRate",
+                "type": "custom"
+            },
+            {
+                "current": {
+                    "selected": true,
+                    "text": "100",
+                    "value": "100"
+                },
+                "includeAll": false,
+                "label": "Minimum Impressions Gate",
+                "multi": false,
+                "name": "min_impressions",
+                "options": [
+                    {
+                        "selected": false,
+                        "text": "0",
+                        "value": "0"
+                    },
+                    {
+                        "selected": true,
+                        "text": "100",
+                        "value": "100"
+                    },
+                    {
+                        "selected": false,
+                        "text": "500",
+                        "value": "500"
+                    },
+                    {
+                        "selected": false,
+                        "text": "1000",
+                        "value": "1000"
+                    },
+                    {
+                        "selected": false,
+                        "text": "2500",
+                        "value": "2500"
+                    },
+                    {
+                        "selected": false,
+                        "text": "5000",
+                        "value": "5000"
+                    },
+                    {
+                        "selected": false,
+                        "text": "10000",
+                        "value": "10000"
+                    }
+                ],
+                "query": "0,100,500,1000,2500,5000,10000",
+                "type": "custom"
+            },
+            {
+                "current": {
+                    "selected": true,
+                    "text": "25",
+                    "value": "25"
+                },
+                "includeAll": false,
+                "label": "Top Dist Count",
+                "multi": false,
+                "name": "show_top",
+                "options": [
+                    {
+                        "selected": false,
+                        "text": "10",
+                        "value": "10"
+                    },
+                    {
+                        "selected": true,
+                        "text": "25",
+                        "value": "25"
+                    },
+                    {
+                        "selected": false,
+                        "text": "50",
+                        "value": "50"
+                    },
+                    {
+                        "selected": false,
+                        "text": "100",
+                        "value": "100"
+                    }
+                ],
+                "query": "10,25,50,100",
+                "type": "custom"
+            }
+        ]
+    },
+    "time": {
+        "from": "now-72h",
+        "to": "now"
+    },
+    "timepicker": {
+        "refresh_intervals": [
+            "30s",
+            "1m",
+            "5m",
+            "15m",
+            "30m",
+            "1h"
+        ],
+        "time_options": [
+            "6h",
+            "12h",
+            "24h",
+            "72h",
+            "7d",
+            "30d"
+        ]
+    },
+    "timezone": "browser",
+    "title": "Dist Productivity & Outlier Intelligence",
+    "uid": "dist-productivity-outliers",
+    "version": 1,
+    "weekStart": ""
+}

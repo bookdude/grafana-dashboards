@@ -1,9 +1,10 @@
 {
   "title": "VCASA System Status",
   "uid": "vcasa-system-status",
-  "description": "Up/Down status for all VCASA systems. Universe = seen YTD in 26_ss_dist_reporting. Online = seen in the most recent hour bucket.",
+  "description": "Real-time up/down status for all VCASA units. Universe = all units observed YTD. Online = active in the most recent data hour. Sorted by reliability (Up %).",
   "tags": ["vcasa", "updown", "monitoring", "clickhouse"],
   "timezone": "browser",
+  "graphTooltip": 1,
   "refresh": "5m",
   "time": { "from": "now-6h", "to": "now" },
   "schemaVersion": 39,
@@ -13,14 +14,17 @@
       "id": 1,
       "type": "stat",
       "title": "Online",
+      "description": "VCASA units with activity in the most recent data hour",
       "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
       "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "colorMode": "background",
         "graphMode": "none",
-        "textMode": "auto",
-        "orientation": "auto"
+        "justifyMode": "center",
+        "textMode": "value_and_name",
+        "orientation": "auto",
+        "wideLayout": true
       },
       "fieldConfig": {
         "defaults": {
@@ -50,14 +54,17 @@
       "id": 2,
       "type": "stat",
       "title": "Offline",
+      "description": "YTD units with no activity in the most recent data hour",
       "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
       "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
         "colorMode": "background",
         "graphMode": "none",
-        "textMode": "auto",
-        "orientation": "auto"
+        "justifyMode": "center",
+        "textMode": "value_and_name",
+        "orientation": "auto",
+        "wideLayout": true
       },
       "fieldConfig": {
         "defaults": {
@@ -87,14 +94,17 @@
       "id": 3,
       "type": "stat",
       "title": "Total YTD Units",
+      "description": "Distinct VCASA units observed since January 1st",
       "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
       "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
-        "colorMode": "background",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
         "graphMode": "none",
-        "textMode": "auto",
-        "orientation": "auto"
+        "justifyMode": "center",
+        "textMode": "value_and_name",
+        "orientation": "auto",
+        "wideLayout": true
       },
       "fieldConfig": {
         "defaults": {
@@ -121,14 +131,17 @@
       "id": 4,
       "type": "stat",
       "title": "Latest Data Hour",
+      "description": "Timestamp of the most recent data ingestion — Online/Offline status is relative to this hour",
       "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
       "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
-        "colorMode": "background",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "colorMode": "value",
         "graphMode": "none",
-        "textMode": "auto",
-        "orientation": "auto"
+        "justifyMode": "center",
+        "textMode": "value_and_name",
+        "orientation": "auto",
+        "wideLayout": true
       },
       "fieldConfig": {
         "defaults": {
@@ -155,27 +168,38 @@
       "id": 5,
       "type": "table",
       "title": "VCASA Status — All YTD Systems",
+      "description": "All VCASA units observed YTD, sorted by reliability (Up %). Status reflects the most recent data hour. Use the column filter icons to search by unit name, city, or state.",
       "gridPos": { "x": 0, "y": 4, "w": 24, "h": 28 },
       "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
       "options": {
-        "sortBy": [{ "displayName": "Status", "desc": false }],
-        "cellHeight": "sm",
+        "sortBy": [{ "displayName": "Up %", "desc": true }],
+        "cellHeight": "md",
+        "showHeader": true,
         "footer": { "show": false }
       },
       "fieldConfig": {
         "defaults": {
           "custom": {
             "align": "auto",
-            "displayMode": "auto",
+            "cellOptions": { "type": "auto" },
             "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
           }
         },
         "overrides": [
           {
             "matcher": { "id": "byName", "options": "Status" },
             "properties": [
-              { "id": "custom.displayMode", "value": "color-background" },
-              { "id": "custom.width", "value": 100 },
+              {
+                "id": "custom.cellOptions",
+                "value": { "type": "color-background", "mode": "basic" }
+              },
+              { "id": "custom.align", "value": "center" },
+              { "id": "custom.width", "value": 110 },
               {
                 "id": "mappings",
                 "value": [
@@ -202,41 +226,36 @@
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "Last Seen" },
+            "matcher": { "id": "byName", "options": "VCASA" },
             "properties": [
-              { "id": "unit", "value": "dateTimeAsLocal" },
-              { "id": "custom.width", "value": 160 }
+              { "id": "custom.width", "value": 115 },
+              { "id": "custom.filterable", "value": true }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "VCASA" },
-            "properties": [{ "id": "custom.width", "value": 120 }]
-          },
-          {
-            "matcher": { "id": "byName", "options": "IP" },
-            "properties": [{ "id": "custom.width", "value": 130 }]
+            "matcher": { "id": "byName", "options": "City" },
+            "properties": [
+              { "id": "custom.width", "value": 140 },
+              { "id": "custom.filterable", "value": true }
+            ]
           },
           {
             "matcher": { "id": "byName", "options": "State" },
-            "properties": [{ "id": "custom.width", "value": 70 }]
-          },
-          {
-            "matcher": { "id": "byName", "options": "Provider" },
-            "properties": [{ "id": "custom.width", "value": 90 }]
-          },
-          {
-            "matcher": { "id": "byName", "options": "Up Hours" },
             "properties": [
-              { "id": "custom.width", "value": 90 },
-              { "id": "custom.align", "value": "right" }
+              { "id": "custom.width", "value": 65 },
+              { "id": "custom.filterable", "value": true }
             ]
           },
           {
             "matcher": { "id": "byName", "options": "Up %" },
             "properties": [
-              { "id": "custom.width", "value": 80 },
-              { "id": "custom.align", "value": "right" },
-              { "id": "custom.displayMode", "value": "color-background" },
+              {
+                "id": "custom.cellOptions",
+                "value": { "type": "color-background", "mode": "gradient" }
+              },
+              { "id": "custom.align", "value": "center" },
+              { "id": "custom.width", "value": 110 },
+              { "id": "decimals", "value": 1 },
               { "id": "unit", "value": "percent" },
               {
                 "id": "thresholds",
@@ -252,13 +271,40 @@
               },
               { "id": "color", "value": { "mode": "thresholds" } }
             ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Up Hours" },
+            "properties": [
+              { "id": "custom.width", "value": 95 },
+              { "id": "custom.align", "value": "right" },
+              { "id": "decimals", "value": 0 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Last Seen" },
+            "properties": [
+              { "id": "unit", "value": "dateTimeAsLocal" },
+              { "id": "custom.width", "value": 160 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "IP" },
+            "properties": [
+              { "id": "custom.width", "value": 130 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "Provider" },
+            "properties": [
+              { "id": "custom.width", "value": 90 }
+            ]
           }
         ]
       },
       "targets": [
         {
           "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
-          "rawSql": "WITH\n  latest_hour AS (\n    SELECT toStartOfHour(max(timestamp)) AS t FROM default.`26_ss_dist_reporting`\n  ),\n  ytd AS (\n    SELECT\n      v.vcasa_name,\n      any(v.ip)                                                                     AS ip,\n      any(v.city)                                                                   AS city,\n      any(v.state)                                                                  AS state,\n      any(v.provider)                                                               AS provider,\n      max(r.timestamp)                                                              AS last_seen,\n      countDistinct(toStartOfHour(r.timestamp))                                     AS up_hours\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= toStartOfYear(today())\n      AND r.Dist NOT LIKE 'generated%'\n    GROUP BY v.vcasa_name\n  ),\n  online AS (\n    SELECT DISTINCT v.vcasa_name\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= (SELECT t FROM latest_hour)\n      AND r.Dist NOT LIKE 'generated%'\n  )\nSELECT\n  y.vcasa_name                                                                      AS \"VCASA\",\n  if(o.vcasa_name != '', 1, 0)                                                      AS \"Status\",\n  y.ip                                                                              AS \"IP\",\n  y.city                                                                            AS \"City\",\n  y.state                                                                           AS \"State\",\n  y.provider                                                                        AS \"Provider\",\n  toUnixTimestamp(y.last_seen) * 1000                                               AS \"Last Seen\",\n  y.up_hours                                                                        AS \"Up Hours\",\n  round(y.up_hours * 100.0 / dateDiff('hour', toStartOfYear(today()), now()), 1)   AS \"Up %\"\nFROM ytd y\nLEFT JOIN online o ON y.vcasa_name = o.vcasa_name\nORDER BY \"Status\" ASC, \"Last Seen\" ASC",
+          "rawSql": "WITH\n  latest_hour AS (\n    SELECT toStartOfHour(max(timestamp)) AS t FROM default.`26_ss_dist_reporting`\n  ),\n  ytd AS (\n    SELECT\n      v.vcasa_name,\n      any(v.ip)                                                                     AS ip,\n      any(v.city)                                                                   AS city,\n      any(v.state)                                                                  AS state,\n      any(v.provider)                                                               AS provider,\n      max(r.timestamp)                                                              AS last_seen,\n      countDistinct(toStartOfHour(r.timestamp))                                     AS up_hours\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= toStartOfYear(today())\n      AND r.Dist NOT LIKE 'generated%'\n    GROUP BY v.vcasa_name\n  ),\n  online AS (\n    SELECT DISTINCT v.vcasa_name\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= (SELECT t FROM latest_hour)\n      AND r.Dist NOT LIKE 'generated%'\n  )\nSELECT\n  if(o.vcasa_name != '', 1, 0)                                                      AS \"Status\",\n  y.vcasa_name                                                                      AS \"VCASA\",\n  y.city                                                                            AS \"City\",\n  y.state                                                                           AS \"State\",\n  round(y.up_hours * 100.0 / dateDiff('hour', toStartOfYear(today()), now()), 1)   AS \"Up %\",\n  y.up_hours                                                                        AS \"Up Hours\",\n  toUnixTimestamp(y.last_seen) * 1000                                               AS \"Last Seen\",\n  y.ip                                                                              AS \"IP\",\n  y.provider                                                                        AS \"Provider\"\nFROM ytd y\nLEFT JOIN online o ON y.vcasa_name = o.vcasa_name\nORDER BY \"Up %\" DESC",
           "format": 1,
           "refId": "A"
         }

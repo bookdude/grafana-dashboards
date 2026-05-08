@@ -2,11 +2,19 @@
   "title": "VCASA System Status",
   "uid": "vcasa-system-status",
   "description": "Real-time up/down status for all VCASA units. Universe = all units observed YTD. Online = active in the most recent data hour. Sorted by reliability (Up %).",
-  "tags": ["vcasa", "updown", "monitoring", "clickhouse"],
+  "tags": [
+    "vcasa",
+    "updown",
+    "monitoring",
+    "clickhouse"
+  ],
   "timezone": "browser",
   "graphTooltip": 1,
   "refresh": "5m",
-  "time": { "from": "now-6h", "to": "now" },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
   "schemaVersion": 39,
   "version": 1,
   "panels": [
@@ -15,10 +23,24 @@
       "type": "stat",
       "title": "Online",
       "description": "VCASA units with activity in the most recent data hour",
-      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
-      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aep99bsdau1a8f"
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
@@ -31,11 +53,19 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "red",   "value": null },
-              { "color": "green", "value": 1 }
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
             ]
           },
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "noValue": "0"
         },
@@ -43,7 +73,10 @@
       },
       "targets": [
         {
-          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aep99bsdau1a8f"
+          },
           "rawSql": "SELECT countDistinct(v.vcasa_name) AS online\nFROM default.`26_ss_dist_reporting` r\nJOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\nWHERE r.timestamp >= toStartOfHour((SELECT max(timestamp) FROM default.`26_ss_dist_reporting`))\n  AND r.Dist NOT LIKE 'generated%'",
           "format": 1,
           "refId": "A"
@@ -55,10 +88,24 @@
       "type": "stat",
       "title": "Offline",
       "description": "YTD units with no activity in the most recent data hour",
-      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
-      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "gridPos": {
+        "x": 4,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aep99bsdau1a8f"
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "colorMode": "background",
         "graphMode": "none",
         "justifyMode": "center",
@@ -71,11 +118,19 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "red",   "value": 1 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
             ]
           },
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "noValue": "0"
         },
@@ -83,7 +138,10 @@
       },
       "targets": [
         {
-          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aep99bsdau1a8f"
+          },
           "rawSql": "WITH\n  latest_hour AS (\n    SELECT toStartOfHour(max(timestamp)) AS t FROM default.`26_ss_dist_reporting`\n  ),\n  ytd_names AS (\n    SELECT DISTINCT v.vcasa_name\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= toStartOfYear(today())\n      AND r.Dist NOT LIKE 'generated%'\n  ),\n  online_names AS (\n    SELECT DISTINCT v.vcasa_name\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= (SELECT t FROM latest_hour)\n      AND r.Dist NOT LIKE 'generated%'\n  )\nSELECT countIf(o.vcasa_name = '') AS offline\nFROM ytd_names y\nLEFT JOIN online_names o ON y.vcasa_name = o.vcasa_name",
           "format": 1,
           "refId": "A"
@@ -95,10 +153,24 @@
       "type": "stat",
       "title": "Total YTD Units",
       "description": "Distinct VCASA units observed since January 1st",
-      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
-      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aep99bsdau1a8f"
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "center",
@@ -110,9 +182,16 @@
         "defaults": {
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "blue", "value": null }]
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
           },
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": [],
           "noValue": "0"
         },
@@ -120,7 +199,10 @@
       },
       "targets": [
         {
-          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aep99bsdau1a8f"
+          },
           "rawSql": "SELECT countDistinct(v.vcasa_name) AS total_ytd\nFROM default.`26_ss_dist_reporting` r\nJOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\nWHERE r.timestamp >= toStartOfYear(today())\n  AND r.Dist NOT LIKE 'generated%'",
           "format": 1,
           "refId": "A"
@@ -131,11 +213,25 @@
       "id": 4,
       "type": "stat",
       "title": "Latest Data Hour",
-      "description": "Timestamp of the most recent data ingestion — Online/Offline status is relative to this hour",
-      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
-      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "description": "Timestamp of the most recent data ingestion \u2014 Online/Offline status is relative to this hour",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aep99bsdau1a8f"
+      },
       "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
         "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "center",
@@ -148,16 +244,26 @@
           "unit": "dateTimeAsLocal",
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "purple", "value": null }]
+            "steps": [
+              {
+                "color": "purple",
+                "value": null
+              }
+            ]
           },
-          "color": { "mode": "thresholds" },
+          "color": {
+            "mode": "thresholds"
+          },
           "mappings": []
         },
         "overrides": []
       },
       "targets": [
         {
-          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aep99bsdau1a8f"
+          },
           "rawSql": "SELECT toUnixTimestamp(toStartOfHour(max(timestamp))) * 1000 AS latest_hour\nFROM default.`26_ss_dist_reporting`",
           "format": 1,
           "refId": "A"
@@ -167,47 +273,89 @@
     {
       "id": 5,
       "type": "table",
-      "title": "VCASA Status — All YTD Systems",
+      "title": "VCASA Status \u2014 All YTD Systems",
       "description": "All VCASA units observed YTD, sorted by reliability (Up %). Status reflects the most recent data hour. Loss % and RTT ms are live from the last 15-minute ping cycle. Use column filter icons to search by unit name, city, or state.",
-      "gridPos": { "x": 0, "y": 4, "w": 24, "h": 28 },
-      "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 28
+      },
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "aep99bsdau1a8f"
+      },
       "options": {
-        "sortBy": [{ "displayName": "Up %", "desc": true }],
+        "sortBy": [
+          {
+            "displayName": "Up %",
+            "desc": true
+          }
+        ],
         "cellHeight": "md",
         "showHeader": true,
-        "footer": { "show": false }
+        "footer": {
+          "show": false
+        }
       },
       "fieldConfig": {
         "defaults": {
           "custom": {
             "align": "auto",
-            "cellOptions": { "type": "auto" },
+            "cellOptions": {
+              "type": "auto"
+            },
             "inspect": false
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
-            "steps": [{ "color": "green", "value": null }]
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
           }
         },
         "overrides": [
           {
-            "matcher": { "id": "byName", "options": "Status" },
+            "matcher": {
+              "id": "byName",
+              "options": "Status"
+            },
             "properties": [
               {
                 "id": "custom.cellOptions",
-                "value": { "type": "color-background", "mode": "basic" }
+                "value": {
+                  "type": "color-background",
+                  "mode": "basic"
+                }
               },
-              { "id": "custom.align", "value": "center" },
-              { "id": "custom.width", "value": 110 },
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              },
               {
                 "id": "mappings",
                 "value": [
                   {
                     "type": "value",
                     "options": {
-                      "0": { "text": "OFFLINE", "color": "red",   "index": 0 },
-                      "1": { "text": "ONLINE",  "color": "green", "index": 1 }
+                      "0": {
+                        "text": "OFFLINE",
+                        "color": "red",
+                        "index": 0
+                      },
+                      "1": {
+                        "text": "ONLINE",
+                        "color": "green",
+                        "index": 1
+                      }
                     }
                   }
                 ]
@@ -217,149 +365,347 @@
                 "value": {
                   "mode": "absolute",
                   "steps": [
-                    { "color": "red",   "value": null },
-                    { "color": "green", "value": 1 }
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "green",
+                      "value": 1
+                    }
                   ]
                 }
               },
-              { "id": "color", "value": { "mode": "thresholds" } }
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "VCASA" },
+            "matcher": {
+              "id": "byName",
+              "options": "VCASA"
+            },
             "properties": [
-              { "id": "custom.width", "value": 115 },
-              { "id": "custom.filterable", "value": true }
+              {
+                "id": "custom.width",
+                "value": 115
+              },
+              {
+                "id": "custom.filterable",
+                "value": true
+              },
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "SSH to VCASA",
+                    "url": "ssh://geoffkorrub@${__data.fields[\"IP\"]}",
+                    "targetBlank": true
+                  }
+                ]
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "Dist" },
+            "matcher": {
+              "id": "byName",
+              "options": "Dist"
+            },
             "properties": [
-              { "id": "custom.width", "value": 260 },
-              { "id": "custom.filterable", "value": true }
+              {
+                "id": "custom.width",
+                "value": 260
+              },
+              {
+                "id": "custom.filterable",
+                "value": true
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "City" },
+            "matcher": {
+              "id": "byName",
+              "options": "City"
+            },
             "properties": [
-              { "id": "custom.width", "value": 140 },
-              { "id": "custom.filterable", "value": true }
+              {
+                "id": "custom.width",
+                "value": 140
+              },
+              {
+                "id": "custom.filterable",
+                "value": true
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "State" },
+            "matcher": {
+              "id": "byName",
+              "options": "State"
+            },
             "properties": [
-              { "id": "custom.width", "value": 65 },
-              { "id": "custom.filterable", "value": true }
+              {
+                "id": "custom.width",
+                "value": 65
+              },
+              {
+                "id": "custom.filterable",
+                "value": true
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "Up %" },
+            "matcher": {
+              "id": "byName",
+              "options": "IP"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 130
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Up %"
+            },
             "properties": [
               {
                 "id": "custom.cellOptions",
-                "value": { "type": "color-background", "mode": "gradient" }
+                "value": {
+                  "type": "color-background",
+                  "mode": "gradient"
+                }
               },
-              { "id": "custom.align", "value": "center" },
-              { "id": "custom.width", "value": 110 },
-              { "id": "decimals", "value": 1 },
-              { "id": "unit", "value": "percent" },
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "custom.width",
+                "value": 110
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              },
               {
                 "id": "thresholds",
                 "value": {
                   "mode": "absolute",
                   "steps": [
-                    { "color": "red",    "value": null },
-                    { "color": "orange", "value": 50 },
-                    { "color": "yellow", "value": 80 },
-                    { "color": "green",  "value": 95 }
+                    {
+                      "color": "red",
+                      "value": null
+                    },
+                    {
+                      "color": "orange",
+                      "value": 50
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 80
+                    },
+                    {
+                      "color": "green",
+                      "value": 95
+                    }
                   ]
                 }
               },
-              { "id": "color", "value": { "mode": "thresholds" } }
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "Up Hours" },
+            "matcher": {
+              "id": "byName",
+              "options": "Up Hours"
+            },
             "properties": [
-              { "id": "custom.width", "value": 95 },
-              { "id": "custom.align", "value": "right" },
-              { "id": "decimals", "value": 0 }
+              {
+                "id": "custom.width",
+                "value": 95
+              },
+              {
+                "id": "custom.align",
+                "value": "right"
+              },
+              {
+                "id": "decimals",
+                "value": 0
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "Loss %" },
+            "matcher": {
+              "id": "byName",
+              "options": "Loss %"
+            },
             "properties": [
               {
                 "id": "custom.cellOptions",
-                "value": { "type": "color-background", "mode": "gradient" }
+                "value": {
+                  "type": "color-background",
+                  "mode": "gradient"
+                }
               },
-              { "id": "custom.align", "value": "center" },
-              { "id": "custom.width", "value": 95 },
-              { "id": "decimals", "value": 1 },
-              { "id": "unit", "value": "percent" },
-              { "id": "noValue", "value": "—" },
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "custom.width",
+                "value": 95
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "unit",
+                "value": "percent"
+              },
+              {
+                "id": "noValue",
+                "value": "\u2014"
+              },
               {
                 "id": "thresholds",
                 "value": {
                   "mode": "absolute",
                   "steps": [
-                    { "color": "green",  "value": null },
-                    { "color": "yellow", "value": 1 },
-                    { "color": "orange", "value": 10 },
-                    { "color": "red",    "value": 20 }
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 1
+                    },
+                    {
+                      "color": "orange",
+                      "value": 10
+                    },
+                    {
+                      "color": "red",
+                      "value": 20
+                    }
                   ]
                 }
               },
-              { "id": "color", "value": { "mode": "thresholds" } }
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "RTT ms" },
+            "matcher": {
+              "id": "byName",
+              "options": "RTT ms"
+            },
             "properties": [
               {
                 "id": "custom.cellOptions",
-                "value": { "type": "color-background", "mode": "gradient" }
+                "value": {
+                  "type": "color-background",
+                  "mode": "gradient"
+                }
               },
-              { "id": "custom.align", "value": "center" },
-              { "id": "custom.width", "value": 95 },
-              { "id": "decimals", "value": 1 },
-              { "id": "unit", "value": "ms" },
-              { "id": "noValue", "value": "—" },
+              {
+                "id": "custom.align",
+                "value": "center"
+              },
+              {
+                "id": "custom.width",
+                "value": 95
+              },
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "unit",
+                "value": "ms"
+              },
+              {
+                "id": "noValue",
+                "value": "\u2014"
+              },
               {
                 "id": "thresholds",
                 "value": {
                   "mode": "absolute",
                   "steps": [
-                    { "color": "green",  "value": null },
-                    { "color": "yellow", "value": 50 },
-                    { "color": "orange", "value": 100 },
-                    { "color": "red",    "value": 150 }
+                    {
+                      "color": "green",
+                      "value": null
+                    },
+                    {
+                      "color": "yellow",
+                      "value": 50
+                    },
+                    {
+                      "color": "orange",
+                      "value": 100
+                    },
+                    {
+                      "color": "red",
+                      "value": 150
+                    }
                   ]
                 }
               },
-              { "id": "color", "value": { "mode": "thresholds" } }
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              }
             ]
           },
           {
-            "matcher": { "id": "byName", "options": "Last Seen" },
+            "matcher": {
+              "id": "byName",
+              "options": "Last Seen"
+            },
             "properties": [
-              { "id": "unit", "value": "dateTimeAsLocal" },
-              { "id": "custom.width", "value": 160 }
-            ]
-          },
-          {
-            "matcher": { "id": "byName", "options": "IP" },
-            "properties": [
-              { "id": "custom.width", "value": 130 }
+              {
+                "id": "unit",
+                "value": "dateTimeAsLocal"
+              },
+              {
+                "id": "custom.width",
+                "value": 160
+              }
             ]
           }
         ]
       },
       "targets": [
         {
-          "datasource": { "type": "grafana-clickhouse-datasource", "uid": "aep99bsdau1a8f" },
-          "rawSql": "WITH\n  latest_hour AS (\n    SELECT toStartOfHour(max(timestamp)) AS t FROM default.`26_ss_dist_reporting`\n  ),\n  ytd AS (\n    SELECT\n      v.vcasa_name,\n      any(v.ip)                                         AS ip,\n      any(v.dist)                                       AS dist,\n      any(v.city)                                       AS city,\n      any(v.state)                                      AS state,\n      any(v.provider)                                   AS provider,\n      max(r.timestamp)                                  AS last_seen,\n      countDistinct(toStartOfHour(r.timestamp))         AS up_hours\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= toStartOfYear(today())\n      AND r.Dist NOT LIKE 'generated%'\n    GROUP BY v.vcasa_name\n  ),\n  online AS (\n    SELECT DISTINCT v.vcasa_name\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= (SELECT t FROM latest_hour)\n      AND r.Dist NOT LIKE 'generated%'\n  ),\n  latest_ping AS (\n    SELECT ip,\n      avgIf(loss,    tx > 0) AS loss_pct,\n      avgIf(rtt_avg, tx > 0) AS rtt_ms\n    FROM default.ping_results\n    WHERE timestamp >= now() - INTERVAL 15 MINUTE\n      AND tx > 0\n    GROUP BY ip\n  ),\n  ping_by_vcasa AS (\n    SELECT v.vcasa_name,\n      round(avg(p.loss_pct), 1) AS loss_pct,\n      round(avg(p.rtt_ms),   1) AS rtt_ms\n    FROM default.v_vcasa_to_dist v\n    JOIN latest_ping p ON v.ip = p.ip\n    GROUP BY v.vcasa_name\n  )\nSELECT\n  if(o.vcasa_name != '', 1, 0)                                                     AS \"Status\",\n  y.vcasa_name                                                                     AS \"VCASA\",\n  if(startsWith(y.dist, 'w_'), substring(y.dist, 3), y.dist)                      AS \"Dist\",\n  y.city                                                                           AS \"City\",\n  y.state                                                                          AS \"State\",\n  round(y.up_hours * 100.0 / dateDiff('hour', toStartOfYear(today()), now()), 1)  AS \"Up %\",\n  y.up_hours                                                                       AS \"Up Hours\",\n  pg.loss_pct                                                                      AS \"Loss %\",\n  pg.rtt_ms                                                                        AS \"RTT ms\",\n  toUnixTimestamp(y.last_seen) * 1000                                              AS \"Last Seen\",\n  y.ip                                                                             AS \"IP\"\nFROM ytd y\nLEFT JOIN online o ON y.vcasa_name = o.vcasa_name\nLEFT JOIN ping_by_vcasa pg ON y.vcasa_name = pg.vcasa_name\nORDER BY \"Up %\" DESC",
+          "datasource": {
+            "type": "grafana-clickhouse-datasource",
+            "uid": "aep99bsdau1a8f"
+          },
+          "rawSql": "WITH\n  latest_hour AS (\n    SELECT toStartOfHour(max(timestamp)) AS t FROM default.`26_ss_dist_reporting`\n  ),\n  ytd AS (\n    SELECT\n      v.vcasa_name,\n      any(v.ip)                                         AS ip,\n      any(v.dist)                                       AS dist,\n      any(v.city)                                       AS city,\n      any(v.state)                                      AS state,\n      any(v.provider)                                   AS provider,\n      max(r.timestamp)                                  AS last_seen,\n      countDistinct(toStartOfHour(r.timestamp))         AS up_hours\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= toStartOfYear(today())\n      AND r.Dist NOT LIKE 'generated%'\n    GROUP BY v.vcasa_name\n  ),\n  online AS (\n    SELECT DISTINCT v.vcasa_name\n    FROM default.`26_ss_dist_reporting` r\n    JOIN default.v_vcasa_to_dist v ON r.Dist = v.dist\n    WHERE r.timestamp >= (SELECT t FROM latest_hour)\n      AND r.Dist NOT LIKE 'generated%'\n  ),\n  latest_ping AS (\n    SELECT ip,\n      avgIf(loss,    tx > 0) AS loss_pct,\n      avgIf(rtt_avg, tx > 0) AS rtt_ms\n    FROM default.ping_results\n    WHERE timestamp >= now() - INTERVAL 15 MINUTE\n      AND tx > 0\n    GROUP BY ip\n  ),\n  ping_by_vcasa AS (\n    SELECT v.vcasa_name,\n      round(avg(p.loss_pct), 1) AS loss_pct,\n      round(avg(p.rtt_ms),   1) AS rtt_ms\n    FROM default.v_vcasa_to_dist v\n    JOIN latest_ping p ON v.ip = p.ip\n    GROUP BY v.vcasa_name\n  )\nSELECT\n  if(o.vcasa_name != '', 1, 0)                                                     AS \"Status\",\n  y.vcasa_name                                                                     AS \"VCASA\",\n  if(startsWith(y.dist, 'w_'), substring(y.dist, 3), y.dist)                      AS \"Dist\",\n  y.city                                                                           AS \"City\",\n  y.state                                                                          AS \"State\",\n  y.ip                                                                             AS \"IP\",\n  round(y.up_hours * 100.0 / dateDiff('hour', toStartOfYear(today()), now()), 1)  AS \"Up %\",\n  y.up_hours                                                                       AS \"Up Hours\",\n  pg.loss_pct                                                                      AS \"Loss %\",\n  pg.rtt_ms                                                                        AS \"RTT ms\",\n  toUnixTimestamp(y.last_seen) * 1000                                              AS \"Last Seen\"\nFROM ytd y\nLEFT JOIN online o ON y.vcasa_name = o.vcasa_name\nLEFT JOIN ping_by_vcasa pg ON y.vcasa_name = pg.vcasa_name\nORDER BY \"Up %\" DESC",
           "format": 1,
           "refId": "A"
         }
